@@ -90,16 +90,16 @@ class JwtTokenProvider(
      * @param token JWT 문자열
      * @return 사용자 고유 ID
      */
-    fun getMemberId(token: String): Long =
-            parseClaims(token).getSubject().toLong()
+    fun getMemberId(token: String?): Long =
+        parseClaims(token!!).subject.toLong()
 
     /**
      * 토큰에서 role(권한) 추출
-     * 
+     *
      * @param token JWT 문자열
      * @return 사용자 권한 문자열 (예: "ROLE_USER")
      */
-    fun getRole(token: String): String =
-            parseClaims(token).get("role", String::class.java)
+    fun getRole(token: String?): String =
+        parseClaims(token!!).get("role", String::class.java)
 
 }
