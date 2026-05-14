@@ -9,7 +9,7 @@ import com.back.team11.global.util.CookieUtil;
 import com.back.team11.domain.member.entity.Member;
 import com.back.team11.domain.member.entity.MemberRole;
 import com.back.team11.domain.member.service.MemberService;
-import com.back.team11.security.JwtTokenProvider;
+import com.back.team11.global.security.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

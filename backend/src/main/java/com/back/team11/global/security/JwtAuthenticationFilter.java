@@ -1,4 +1,4 @@
-package com.back.team11.security;
+package com.back.team11.global.security;
 
 import com.back.team11.global.exception.ErrorCode;
 import io.jsonwebtoken.ExpiredJwtException;

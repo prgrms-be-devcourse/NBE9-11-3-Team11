@@ -1,4 +1,4 @@
-package com.back.team11.security;
+package com.back.team11.global.security;
 
 public class CustomUserDetailsService {
 }

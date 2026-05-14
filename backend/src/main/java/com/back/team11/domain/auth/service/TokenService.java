@@ -2,7 +2,7 @@ package com.back.team11.domain.auth.service;
 
 import com.back.team11.domain.auth.entity.RefreshToken;
 import com.back.team11.domain.auth.repository.RefreshTokenRepository;
-import com.back.team11.security.JwtTokenProvider;
+import com.back.team11.global.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

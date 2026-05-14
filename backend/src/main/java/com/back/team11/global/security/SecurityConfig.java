@@ -1,4 +1,4 @@
-package com.back.team11.security;
+package com.back.team11.global.security;
 
 import com.back.team11.domain.auth.oauth.CustomOAuth2UserService;
 import com.back.team11.domain.auth.oauth.OAuth2SuccessHandler;

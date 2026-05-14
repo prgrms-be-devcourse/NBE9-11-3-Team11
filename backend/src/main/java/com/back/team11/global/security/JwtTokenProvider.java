@@ -1,4 +1,4 @@
-package com.back.team11.security;
+package com.back.team11.global.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
