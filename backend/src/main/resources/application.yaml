@@ -1,0 +1,64 @@
+spring:
+  application:
+    name: backend
+
+  config:
+    import: optional:file:.env[.properties]
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/cafe_study?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  sql:
+    init:
+      mode: always
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+        show_sql: true
+    defer-datasource-initialization: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: ${CLIENT_ID}
+            authorization-grant-type: authorization_code
+            redirect-uri: "http://localhost:8080/api/V1/auth/oauth/kakao/callback"
+            client-name: Kakao
+            scope:
+              - profile_nickname
+              - profile_image
+
+
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+  batch:
+    job:
+      enabled: false # 서버 시작시 자동실행
+
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expiration: 1800000
+  refresh-token-expiration: 604800000
+
+kakao:
+  rest-api-key: ${KAKAO_REST_API_KEY}
+
+server:
+  port: 8080
+
+springdoc:
+  default-produces-media-type: application/json; charset=UTF-8

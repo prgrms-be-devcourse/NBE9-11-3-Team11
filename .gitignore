@@ -1,0 +1,14 @@
+# Backend
+backend/build/
+backend/.gradle/
+backend/.idea/
+
+# Frontend
+frontend/node_modules/
+frontend/.next/
+
+# 공통
+.env
+.DS_Store
+.idea/
+*.iml
