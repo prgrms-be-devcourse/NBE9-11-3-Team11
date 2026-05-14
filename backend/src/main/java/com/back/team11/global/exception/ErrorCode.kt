@@ -1,13 +1,14 @@
-package com.back.team11.global.exception;
+package com.back.team11.global.exception
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 
-@Getter
-@RequiredArgsConstructor
-public enum ErrorCode {
+import org.springframework.http.HttpStatus
 
+
+enum class ErrorCode (
+    val httpStatus: HttpStatus,
+    val code: String,
+    val message: String,
+){
     // 공통
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "400-1", "잘못된 입력값입니다."),
     INVALID_COORDINATE(HttpStatus.BAD_REQUEST, "400-2", "잘못된 좌표값입니다."),
@@ -41,7 +42,4 @@ public enum ErrorCode {
     WISHLIST_NOT_FOUND(HttpStatus.NOT_FOUND, "404-5", "존재하지 않는 찜 내역입니다."),
     WISHLIST_ALREADY_EXISTS(HttpStatus.CONFLICT, "409-4", "이미 찜한 카페입니다.");
 
-    private final HttpStatus httpStatus;
-    private final String code;
-    private final String message;
 }
