@@ -1,5 +1,8 @@
 package com.back.team11;
 
+import com.back.team11.domain.member.entity.Member;
+import com.back.team11.domain.member.entity.MemberRole;
+import com.back.team11.domain.member.repository.MemberRepository;
 import com.back.team11.domain.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
@@ -11,6 +14,7 @@ import org.springframework.stereotype.Component;
 public class DataInitializer implements CommandLineRunner {
 
     private final MemberService memberService;
+    private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -29,5 +33,10 @@ public class DataInitializer implements CommandLineRunner {
             memberService.updatePasswordByEmail(email, encodedPassword); // 비밀번호 갱신
             System.out.println("Admin account already exists, password updated.");
         }
+
+        // ADMIN role 보장
+        Member admin = memberService.findByEmail(email);
+        admin.setRole(MemberRole.ADMIN);
+        memberRepository.save(admin);
     }
 }
