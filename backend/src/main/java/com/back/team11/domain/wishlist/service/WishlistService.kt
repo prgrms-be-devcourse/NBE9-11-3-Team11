@@ -35,7 +35,7 @@ class WishlistService(
 
         // Member는 한 카페에 한번만 찜 가능
         if (wishlistRepository.existsByMemberIdAndCafeId(member.id!!, cafeId)) {
-            throw CustomException(ErrorCode.REVIEW_ALREADY_EXISTS)
+            throw CustomException(ErrorCode.WISHLIST_ALREADY_EXISTS)
         }
 
         val wishlist = Wishlist.create(member, cafe)
@@ -56,7 +56,7 @@ class WishlistService(
 
         // 찜 내역 없으면
         if (!wishlistRepository.existsByMemberIdAndCafeId(member.id!!, cafeId)) {
-            throw CustomException(ErrorCode.REVIEW_NOT_FOUND)
+            throw CustomException(ErrorCode.WISHLIST_NOT_FOUND)
         }
 
         wishlistRepository.deleteByMemberIdAndCafeId(member.id!!, cafe.id)

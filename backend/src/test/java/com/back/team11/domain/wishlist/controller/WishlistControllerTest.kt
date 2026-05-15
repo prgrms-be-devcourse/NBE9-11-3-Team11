@@ -167,10 +167,10 @@ internal class WishlistControllerTest {
                 .cookie(accessToken!!)
         ).andDo(MockMvcResultHandlers.print())
 
-        // WishlistService에서 REVIEW_ALREADY_EXISTS 사용 중 → 409-3
+        // WISHLIST_ALREADY_EXISTS → 409-4
         resultActions
             .andExpect(MockMvcResultMatchers.status().isConflict())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.resultCode").value("409-3"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.resultCode").value("409-4"))
     }
 
     @Test
@@ -234,10 +234,10 @@ internal class WishlistControllerTest {
                 .cookie(accessToken!!)
         ).andDo(MockMvcResultHandlers.print())
 
-        // WishlistService에서 REVIEW_NOT_FOUND 사용 중 → 404-4
+        // WISHLIST_NOT_FOUND → 404-5
         resultActions
             .andExpect(MockMvcResultMatchers.status().isNotFound())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.resultCode").value("404-4"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.resultCode").value("404-5"))
     }
 
     @Test
