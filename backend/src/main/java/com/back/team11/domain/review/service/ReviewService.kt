@@ -87,7 +87,7 @@ class ReviewService(
         val review = reviewRepository.findByIdAndCafeIdWithFetch(reviewId, cafeId)
             .orElseThrow { CustomException(ErrorCode.REVIEW_NOT_FOUND) }
 
-        if (review.member.id != resolvedMemberId) {
+        if (review.member?.id != resolvedMemberId) {
             throw CustomException(ErrorCode.FORBIDDEN_REVIEW)
         }
 
@@ -103,7 +103,7 @@ class ReviewService(
         val review = reviewRepository.findByIdAndCafeId(reviewId, cafeId)
             .orElseThrow { CustomException(ErrorCode.REVIEW_NOT_FOUND) }
 
-        if (review.member.id != resolvedMemberId && !authUtil.isAdmin) {
+        if (review.member?.id != resolvedMemberId && !authUtil.isAdmin) {
             throw CustomException(ErrorCode.FORBIDDEN_REVIEW)
         }
 

@@ -50,39 +50,51 @@ internal class ReviewControllerTest {
 
     @BeforeEach
     fun setUp() {
-        // 사용자1 (리뷰 작성자) - ADMIN 계정으로 토큰 발급
+
+        // 사용자1
         if (memberRepository!!.findByEmail("user1@test.com").isEmpty()) {
-            val user1 = Member()
-            user1.setEmail("user1@test.com")
-            user1.setPassword(passwordEncoder!!.encode("1234"))
-            user1.setNickname("사용자1")
-            user1.setRole(MemberRole.ADMIN) // 토큰 발급을 위해 ADMIN 사용
+            val user1 = Member(
+                email = "user1@test.com",
+                nickname = "사용자1"
+            ).apply {
+                password = passwordEncoder!!.encode("1234")
+                role = MemberRole.ADMIN
+            }
+
             memberRepository.save(user1)
         }
+
         savedUser = memberRepository.findByEmail("user1@test.com").get()
 
-        // 사용자2 (다른 사용자 - 권한 없는 수정/삭제 테스트용)
+        // 사용자2
         if (memberRepository.findByEmail("user2@test.com").isEmpty()) {
-            val user2 = Member()
-            user2.setEmail("user2@test.com")
-            user2.setPassword(passwordEncoder!!.encode("1234"))
-            user2.setNickname("사용자2")
-            user2.setRole(MemberRole.ADMIN) // 토큰 발급을 위해 ADMIN 사용
+            val user2 = Member(
+                email = "user2@test.com",
+                nickname = "사용자2"
+            ).apply {
+                password = passwordEncoder!!.encode("1234")
+                role = MemberRole.ADMIN
+            }
+
             memberRepository.save(user2)
         }
 
-        // 관리자 (다른 사람 리뷰 삭제 가능 테스트용)
+        // 관리자
         if (memberRepository.findByEmail("admin@test.com").isEmpty()) {
-            val admin = Member()
-            admin.setEmail("admin@test.com")
-            admin.setPassword(passwordEncoder!!.encode("1234"))
-            admin.setNickname("관리자")
-            admin.setRole(MemberRole.ADMIN)
+            val admin = Member(
+                email = "admin@test.com",
+                nickname = "관리자"
+            ).apply {
+                password = passwordEncoder!!.encode("1234")
+                role = MemberRole.ADMIN
+            }
+
             memberRepository.save(admin)
         }
+
         savedAdmin = memberRepository.findByEmail("admin@test.com").get()
 
-        // 테스트용 카페 (APPROVED)
+        // 테스트용 카페
         val cafe = Cafe.createByAdmin(
             "테스트 카페",
             "서울시 강남구 테헤란로 1",
@@ -92,12 +104,15 @@ internal class ReviewControllerTest {
             "조용한 카페",
             CafeType.entries[0],
             Franchise.entries[0],
-            true, true, true,
+            true,
+            true,
+            true,
             FloorCount.entries[0],
             false,
             CongestionLevel.entries[0],
             null
         )
+
         savedCafe = cafeRepository!!.save(cafe)
 
         memberRepository.flush()
@@ -137,7 +152,7 @@ internal class ReviewControllerTest {
                 """.trimIndent()
 
         val resultActions = mvc!!.perform(
-            MockMvcRequestBuilders.post("/api/V1/cafe/{cafeId}/reviews", savedCafe!!.getId())
+            MockMvcRequestBuilders.post("/api/V1/cafe/{cafeId}/reviews", savedCafe!!.id)
                 .cookie(accessToken!!)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
@@ -150,7 +165,7 @@ internal class ReviewControllerTest {
             .andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("리뷰가 작성되었습니다."))
             .andExpect(MockMvcResultMatchers.jsonPath("$.resultCode").value("201"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.data.content").value("정말 좋은 카페입니다!"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.cafeId").value(savedCafe!!.getId()))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.cafeId").value(savedCafe!!.id))
             .andExpect(MockMvcResultMatchers.jsonPath("$.data.id").exists())
     }
 
@@ -164,7 +179,7 @@ internal class ReviewControllerTest {
                 """.trimIndent()
 
         val resultActions = mvc!!.perform(
-            MockMvcRequestBuilders.post("/api/V1/cafe/{cafeId}/reviews", savedCafe!!.getId())
+            MockMvcRequestBuilders.post("/api/V1/cafe/{cafeId}/reviews", savedCafe!!.id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
         )
@@ -187,7 +202,7 @@ internal class ReviewControllerTest {
                 """.trimIndent()
 
         val resultActions = mvc!!.perform(
-            MockMvcRequestBuilders.post("/api/V1/cafe/{cafeId}/reviews", savedCafe!!.getId())
+            MockMvcRequestBuilders.post("/api/V1/cafe/{cafeId}/reviews", savedCafe!!.id)
                 .cookie(accessToken!!)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
@@ -239,7 +254,7 @@ internal class ReviewControllerTest {
                 """.trimIndent()
 
         val resultActions = mvc!!.perform(
-            MockMvcRequestBuilders.post("/api/V1/cafe/{cafeId}/reviews", savedCafe!!.getId())
+            MockMvcRequestBuilders.post("/api/V1/cafe/{cafeId}/reviews", savedCafe!!.id)
                 .cookie(accessToken!!)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
@@ -260,7 +275,7 @@ internal class ReviewControllerTest {
         reviewRepository.flush()
 
         val resultActions = mvc!!.perform(
-            MockMvcRequestBuilders.get("/api/V1/cafe/{cafeId}/reviews", savedCafe!!.getId())
+            MockMvcRequestBuilders.get("/api/V1/cafe/{cafeId}/reviews", savedCafe!!.id)
         )
             .andDo(MockMvcResultHandlers.print())
 
@@ -294,7 +309,7 @@ internal class ReviewControllerTest {
         reviewRepository.flush()
 
         val resultActions = mvc!!.perform(
-            MockMvcRequestBuilders.get("/api/V1/cafe/{cafeId}/reviews/page", savedCafe!!.getId())
+            MockMvcRequestBuilders.get("/api/V1/cafe/{cafeId}/reviews/page", savedCafe!!.id)
                 .param("page", "0")
                 .param("size", "10")
         )
@@ -325,7 +340,7 @@ internal class ReviewControllerTest {
         val resultActions = mvc!!.perform(
             MockMvcRequestBuilders.put(
                 "/api/V1/cafe/{cafeId}/reviews/{reviewId}",
-                savedCafe!!.getId(), review.id
+                savedCafe!!.id, review.id
             )
                 .cookie(accessToken!!)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -358,7 +373,7 @@ internal class ReviewControllerTest {
         val resultActions = mvc!!.perform(
             MockMvcRequestBuilders.put(
                 "/api/V1/cafe/{cafeId}/reviews/{reviewId}",
-                savedCafe!!.getId(), review.id
+                savedCafe!!.id, review.id
             )
                 .cookie(accessToken!!)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -385,7 +400,7 @@ internal class ReviewControllerTest {
         val resultActions = mvc!!.perform(
             MockMvcRequestBuilders.put(
                 "/api/V1/cafe/{cafeId}/reviews/{reviewId}",
-                savedCafe!!.getId(), 99999L
+                savedCafe!!.id, 99999L
             )
                 .cookie(accessToken!!)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -411,7 +426,7 @@ internal class ReviewControllerTest {
         val resultActions = mvc!!.perform(
             MockMvcRequestBuilders.delete(
                 "/api/V1/cafe/{cafeId}/reviews/{reviewId}",
-                savedCafe!!.getId(), review.id
+                savedCafe!!.id, review.id
             )
                 .cookie(accessToken!!)
         )
@@ -436,7 +451,7 @@ internal class ReviewControllerTest {
         val resultActions = mvc!!.perform(
             MockMvcRequestBuilders.delete(
                 "/api/V1/cafe/{cafeId}/reviews/{reviewId}",
-                savedCafe!!.getId(), review.id
+                savedCafe!!.id, review.id
             )
                 .cookie(adminAccessToken!!)
         )
@@ -457,7 +472,7 @@ internal class ReviewControllerTest {
         val resultActions = mvc!!.perform(
             MockMvcRequestBuilders.delete(
                 "/api/V1/cafe/{cafeId}/reviews/{reviewId}",
-                savedCafe!!.getId(), 99999L
+                savedCafe!!.id, 99999L
             )
                 .cookie(accessToken!!)
         )
@@ -478,7 +493,7 @@ internal class ReviewControllerTest {
         val resultActions = mvc!!.perform(
             MockMvcRequestBuilders.delete(
                 "/api/V1/cafe/{cafeId}/reviews/{reviewId}",
-                savedCafe!!.getId(), review.id
+                savedCafe!!.id, review.id
             )
         )
             .andDo(MockMvcResultHandlers.print())

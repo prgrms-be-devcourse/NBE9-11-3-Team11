@@ -26,11 +26,11 @@ class Review(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    val member: Member = Member(),
+    val member: Member ?= null,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cafe_id", nullable = false)
-    val cafe: Cafe = Cafe(),
+    val cafe: Cafe ?= null,
 
     @Column(nullable = false, columnDefinition = "TEXT")
     var content: String = "",
