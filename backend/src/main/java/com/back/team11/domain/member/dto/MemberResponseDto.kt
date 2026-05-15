@@ -3,7 +3,7 @@ package com.back.team11.domain.member.dto
 import com.back.team11.domain.member.entity.Member
 
 data class MemberResponseDto(
-    val memberId: Long,
+    val memberId: Long?,
     val nickname: String,
     val email: String,
     val role: String

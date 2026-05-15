@@ -13,7 +13,7 @@ import java.time.LocalDateTime
 class Member(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    val id: Long? = null,
 
     @Column(nullable = false, unique = true, length = 100)
     var email: String,
@@ -41,6 +41,7 @@ class Member(
     var updatedAt: LocalDateTime? = null,
 ) {
     companion object {
+        @JvmStatic
         fun create(
             email: String,
             password: String,
@@ -55,6 +56,7 @@ class Member(
             )
         }
 
+        @JvmStatic
         fun createOAuth(
             email: String,
             nickname: String,
