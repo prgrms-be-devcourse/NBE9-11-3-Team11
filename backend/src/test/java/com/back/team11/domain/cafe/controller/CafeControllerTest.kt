@@ -45,7 +45,7 @@ class CafeControllerTest {
     fun setUp() { // Java: void setUp() throws Exception → Kotlin: throws Exception 선언 불필요
         if (memberRepository.findByEmail("admin@test.com").isEmpty) {
             // Java: new Member()로 기본 생성자 생성 후 setter로 필드 세팅
-// Kotlin: 기본 생성자 없이 주생성자 네임드 파라미터로 한번에 생성
+            // Kotlin: 기본 생성자 없이 주생성자 네임드 파라미터로 한번에 생성
             val admin = Member(
                 email = "admin@test.com",
                 password = passwordEncoder.encode("1234"),
