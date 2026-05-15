@@ -1,11 +1,7 @@
-package com.back.team11.domain.auth.dto;
+package com.back.team11.domain.auth.dto
 
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
-public class LoginRequestDto {
-    private String email;
-    private String password;
-}
+data class LoginRequestDto(
+    val email: String,
+    val password: String
+)
