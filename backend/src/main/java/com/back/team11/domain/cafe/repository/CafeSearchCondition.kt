@@ -6,8 +6,6 @@ import com.back.team11.domain.cafe.entity.FloorCount
 import com.back.team11.domain.cafe.entity.Franchise
 import jakarta.validation.constraints.DecimalMax
 import jakarta.validation.constraints.DecimalMin
-import lombok.Getter
-import lombok.Setter
 
 data class CafeSearchCondition(
     // 좌표 범위
