@@ -75,10 +75,10 @@ class ReviewController (
     fun getReviewsPage(
         @PathVariable cafeId: Long,
         @PageableDefault(size = 10) pageable: Pageable
-    ): ResponseEntity<RsData<PageResponse<ReviewResponseDto?>?>> {
+    ): ResponseEntity<RsData<PageResponse<ReviewResponseDto>>> {
         val data = reviewService.getReviewsPage(cafeId, pageable)
-        return ResponseEntity.ok<RsData<PageResponse<ReviewResponseDto?>?>>(
-            RsData<PageResponse<ReviewResponseDto?>?>(
+        return ResponseEntity.ok<RsData<PageResponse<ReviewResponseDto>>>(
+            RsData<PageResponse<ReviewResponseDto>>(
                 "리뷰 페이징 조회 성공",
                 "200",
                 data
