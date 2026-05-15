@@ -27,4 +27,14 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("DELETE FROM Review r WHERE r.cafe.id = :cafeId")
     void deleteByCafeId(@Param("cafeId") Long cafeId);
 
+
+    @Query("SELECT r FROM Review r JOIN FETCH r.member JOIN FETCH r.cafe WHERE r.cafe.id = :cafeId ORDER BY r.createdAt DESC")
+    List<Review> findAllByCafeIdWithFetch(@Param("cafeId") Long cafeId);
+
+    @Query("SELECT r FROM Review r JOIN FETCH r.member JOIN FETCH r.cafe WHERE r.cafe.id = :cafeId")
+    Page<Review> findAllByCafeIdWithFetch(@Param("cafeId") Long cafeId, Pageable pageable);
+
+    @Query("SELECT r FROM Review r JOIN FETCH r.member JOIN FETCH r.cafe WHERE r.id = :reviewId AND r.cafe.id = :cafeId")
+    Optional<Review> findByIdAndCafeIdWithFetch(@Param("reviewId") Long reviewId, @Param("cafeId") Long cafeId);
+
 }

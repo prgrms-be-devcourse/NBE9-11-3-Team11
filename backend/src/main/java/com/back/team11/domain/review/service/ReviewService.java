@@ -57,7 +57,7 @@ public class ReviewService {
         cafeRepository.findById(cafeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CAFE_NOT_FOUND));
 
-        return reviewRepository.findAllByCafeIdOrderByCreatedAtDesc(cafeId).stream()
+        return reviewRepository.findAllByCafeIdWithFetch(cafeId).stream()
                 .map(ReviewResponseDto::from)
                 .collect(Collectors.toList());
     }
@@ -77,7 +77,7 @@ public class ReviewService {
 
 
         Page<ReviewResponseDto> page = reviewRepository
-                .findAllByCafeId(cafeId, sortedPageable)
+                .findAllByCafeIdWithFetch(cafeId, sortedPageable)
                 .map(ReviewResponseDto::from);
 
         return PageResponse.from(page);
@@ -85,7 +85,7 @@ public class ReviewService {
 
     //리뷰 수정
     public ReviewResponseDto updateReview(Long cafeId, Long reviewId, ReviewRequestDto requestDto, Long memberId) {
-        Review review = reviewRepository.findByIdAndCafeId(reviewId, cafeId)
+        Review review = reviewRepository.findByIdAndCafeIdWithFetch(reviewId, cafeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
 
         if (!review.getMember().getId().equals(memberId)) {
