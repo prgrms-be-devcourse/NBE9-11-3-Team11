@@ -45,7 +45,7 @@ public class ReviewService {
             throw new CustomException(ErrorCode.REVIEW_ALREADY_EXISTS);
         }
 
-        Review review = new Review(member, cafe, requestDto.content());
+        Review review = new Review(member, cafe, requestDto.getContent());
         reviewRepository.save(review);
 
         return ReviewResponseDto.from(review);
@@ -92,7 +92,7 @@ public class ReviewService {
             throw new CustomException(ErrorCode.FORBIDDEN_REVIEW);
         }
 
-        review.update(requestDto.content());
+        review.update(requestDto.getContent());
 
         return ReviewResponseDto.from(review);
     }
