@@ -162,33 +162,6 @@ class Cafe(
             imageUrl = imageUrl,
             status = CafeStatus.PENDING, // 사용자 제보 → 관리자 심사 대기
         )
-
-        //배치용 임시 메서드
-        @JvmStatic
-        fun createByBatch(
-            name: String,
-            address: String,
-            latitude: BigDecimal,
-            longitude: BigDecimal,
-            phone: String?,
-            franchise: Franchise,
-        ): Cafe = Cafe(
-            name = name,
-            address = address,
-            latitude = latitude,
-            longitude = longitude,
-            phone = phone,
-            franchise = franchise,
-            type = if (franchise == Franchise.NONE) CafeType.INDIVIDUAL else CafeType.FRANCHISE,
-            // 기본값 설정: API에서 알 수 없는 정보들은 기본값으로 세팅
-            hasToilet = false,
-            hasOutlet = false,
-            hasWifi = false,
-            floorCount = FloorCount.ONE,
-            hasSeparateSpace = false,
-            congestionLevel = CongestionLevel.LOW,
-            status = CafeStatus.APPROVED, // 즉시 승인 상태로 저장
-        )
     }
 
     // ─────────────────────────────────────────────
