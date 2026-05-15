@@ -36,6 +36,7 @@ class Wishlist(
     val id: Long = 0,
 ) {
     companion object {
+        @JvmStatic
         fun create(member: Member, cafe: Cafe): Wishlist =
             Wishlist(member = member, cafe = cafe)
     }
