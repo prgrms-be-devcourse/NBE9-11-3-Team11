@@ -34,12 +34,13 @@ class TokenReissueController(
         ApiResponse(responseCode = "401", description = "만료된 리프레쉬 토큰")
     )
     fun refresh(
-        request: HttpServletRequest?,
-        response: HttpServletResponse?
+        request: HttpServletRequest,
+        response: HttpServletResponse
     ): ResponseEntity<RsData<Unit>> {
         tokenReissueService.reissue(request, response)
 
         return ResponseEntity.ok(
-            RsData<Unit>("토큰 재발급 성공", "200"))
+            RsData<Unit>("토큰 재발급 성공", "200")
+        )
     }
 }
