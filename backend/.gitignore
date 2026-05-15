@@ -41,3 +41,6 @@ out/
 .env
 src/main/resources/data.sql
 src/main/generated
+
+.kotlin/
+*.log
