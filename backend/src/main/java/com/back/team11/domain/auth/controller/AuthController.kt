@@ -39,10 +39,7 @@ class AuthController(
         authService.logout(request, response)
 
         return ResponseEntity.ok(
-            RsData<Unit>(
-                "로그아웃 성공",
-                "200"
-            )
+            RsData<Unit>("로그아웃 성공", "200")
         )
     }
 
@@ -54,13 +51,13 @@ class AuthController(
     )
     fun getMe(): ResponseEntity<RsData<MemberResponseDto>> {
         val memberId = authUtil.currentMemberId
-        val memberResponseDto = memberService.getMe(memberId)
+            ?: throw IllegalStateException("로그인 후 이용해 주세요.")
 
         return ResponseEntity.ok(
             RsData(
                 "내 정보 조회 성공",
                 "200",
-                memberResponseDto
+                memberService.getMe(memberId)
             )
         )
     }
