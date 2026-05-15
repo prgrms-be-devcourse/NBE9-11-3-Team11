@@ -113,12 +113,12 @@ public class CafeApiItemReader implements ItemReader<KakaoPlaceDto> {
         KakaoSearchResponse response = responseEntity.getBody();
 
         // 데이터가 없거나, 마지막 페이지(isEnd)에 도달했다면
-        if (response == null || response.documents().isEmpty() || response.meta().isEnd()) {
+        if (response == null || response.getDocuments().isEmpty() || response.getMeta().isEnd()) {
             gridIndex++;      // 다음 좌표 지점으로 이동
             currentPage = 1;  // 페이지 번호는 다시 1페이지부터 시작
         } else {
             // 가져온 데이터들을 버퍼에 모두 저장
-            buffer.addAll(response.documents());
+            buffer.addAll(response.getDocuments());
             // 다음 조사를 위해 페이지 번호 1 증가
             currentPage++;
         }
