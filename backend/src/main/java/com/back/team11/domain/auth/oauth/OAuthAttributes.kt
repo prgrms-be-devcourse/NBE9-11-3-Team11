@@ -4,9 +4,9 @@ import com.back.team11.domain.member.entity.Provider
 
 data class OAuthAttributes(
     val provider: Provider,
-    val providerId: String?,
-    val email: String?,
-    val nickname: String?,
+    val providerId: String,
+    val email: String,
+    val nickname: String,
     val attributes: Map<String, Any?>
 ) {
     companion object {
@@ -18,15 +18,11 @@ data class OAuthAttributes(
          * - "kakao" -> ofKakao(attributes)
          * - 추후 "google", "naver"도 추가 가능
          */
-        fun of(
-            registrationId: String,
-            attributes: Map<String, Any?>
-        ): OAuthAttributes {
-            return when (registrationId.lowercase()) {
+        fun of(registrationId: String, attributes: Map<String, Any?>): OAuthAttributes =
+            when (registrationId.lowercase()) {
                 "kakao" -> ofKakao(attributes)
                 else -> throw IllegalArgumentException("지원하지 않는 OAuth 제공자입니다: $registrationId")
             }
-        }
 
         /**
          * 카카오 사용자 정보 응답을 우리 서비스 공통 형식으로 변환
@@ -43,19 +39,17 @@ data class OAuthAttributes(
          * }
          */
         private fun ofKakao(attributes: Map<String, Any?>): OAuthAttributes {
-            val providerId = attributes["id"]?.toString()
-
-            val kakaoAccount = getMap(attributes, "kakao_account")
-            val profile = getMap(kakaoAccount, "profile")
-
-            val email = getString(kakaoAccount, "email")
-            val nickname = getString(profile, "nickname")
+            val kakaoAccount = attributes.getMap("kakao_account")
+            val profile = kakaoAccount.getMap("profile")
 
             return OAuthAttributes(
                 provider = Provider.KAKAO,
-                providerId = providerId,
-                email = email,
-                nickname = nickname,
+                providerId = attributes["id"]?.toString()
+                    ?: throw IllegalArgumentException("카카오 providerId가 없습니다."),
+                email = kakaoAccount.getString("email")
+                    ?: throw IllegalArgumentException("카카오 email이 없습니다."),
+                nickname = profile.getString("nickname")
+                    ?: throw IllegalArgumentException("카카오 nickname이 없습니다."),
                 attributes = attributes
             )
         }
@@ -69,23 +63,11 @@ data class OAuthAttributes(
          * 안전하게 형변환해서 꺼내기 위한 헬퍼 메서드
          */
         @Suppress("UNCHECKED_CAST")
-        private fun getMap(
-            attributes: Map<String, Any?>,
-            key: String
-        ): Map<String, Any?> {
-            return attributes[key] as? Map<String, Any?> ?: emptyMap()
-        }
+        private fun Map<String, Any?>.getMap(key: String): Map<String, Any?> =
+            this[key] as? Map<String, Any?> ?: emptyMap()
 
-        /**
-         * Map 안에서 특정 key의 값을 문자열로 꺼내는 헬퍼 메서드
-         *
-         * 값이 없으면 null 반환
-         */
-        private fun getString(
-            attributes: Map<String, Any?>,
-            key: String
-        ): String? {
-            return attributes[key]?.toString()
-        }
+        private fun Map<String, Any?>.getString(key: String): String? =
+            this[key]?.toString()
+
     }
 }
