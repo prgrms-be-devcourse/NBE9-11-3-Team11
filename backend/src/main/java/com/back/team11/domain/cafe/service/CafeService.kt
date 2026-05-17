@@ -11,6 +11,7 @@ import com.back.team11.domain.member.repository.MemberRepository
 import com.back.team11.domain.wishlist.repository.WishlistRepository
 import com.back.team11.global.exception.CustomException
 import com.back.team11.global.exception.ErrorCode
+import com.back.team11.global.extenstion.findByIdOrThrow
 import com.back.team11.global.util.AuthUtil
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -32,8 +33,7 @@ class CafeService(
 
     // 카페 상세보기
     fun getCafe(cafeId: Long): CafeDetailResponse {
-        val cafe = cafeRepository.findById(cafeId)
-            .orElseThrow { CustomException(ErrorCode.CAFE_NOT_FOUND) }
+        val cafe = cafeRepository.findByIdOrThrow(cafeId) { CustomException(ErrorCode.CAFE_NOT_FOUND) }
         val wishlistCount = wishlistRepository.countByCafeId(cafeId)
         val memberId = authUtil.currentMemberIdOrNull
         val isWishlisted = memberId != null &&
@@ -49,8 +49,7 @@ class CafeService(
     @Transactional
     fun reportCafe(memberId: Long, request: CafeRequest): CafeResponse {
         // 로그인한 사용자 조회
-        val member = memberRepository.findById(memberId)
-            .orElseThrow { CustomException(ErrorCode.MEMBER_NOT_FOUND) }
+        val member = memberRepository.findByIdOrThrow(memberId) { CustomException(ErrorCode.MEMBER_NOT_FOUND) }
 
         val cafe = Cafe.createByUser(
             member = member,

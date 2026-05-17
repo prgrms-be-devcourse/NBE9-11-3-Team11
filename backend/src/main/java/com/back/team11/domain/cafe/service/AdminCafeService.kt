@@ -10,6 +10,7 @@ import com.back.team11.domain.review.repository.ReviewRepository
 import com.back.team11.domain.wishlist.repository.WishlistRepository
 import com.back.team11.global.exception.CustomException
 import com.back.team11.global.exception.ErrorCode
+import com.back.team11.global.extenstion.findByIdOrThrow
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -57,8 +58,7 @@ class AdminCafeService(
     @Transactional
     fun updateCafe(cafeId: Long, request: CafeUpdateRequest): AdminCafeResponse {
         // cafeId로 카페 조회, 존재하지 않으면 예외 발생
-        val cafe = cafeRepository.findById(cafeId)
-            .orElseThrow { CustomException(ErrorCode.CAFE_NOT_FOUND) }
+        val cafe = cafeRepository.findByIdOrThrow(cafeId) { CustomException(ErrorCode.CAFE_NOT_FOUND) }
 
         // type, franchise 둘 다 전송된 경우에만 일관성 검증
         if (request.type != null || request.franchise != null) {
@@ -126,9 +126,7 @@ class AdminCafeService(
      */
     @Transactional(readOnly = true)
     fun getCafe(cafeId: Long): AdminCafeResponse {
-        val cafe = cafeRepository.findById(cafeId)
-            .orElseThrow { CustomException(ErrorCode.CAFE_NOT_FOUND) }
-
+        val cafe = cafeRepository.findByIdOrThrow(cafeId) { CustomException(ErrorCode.CAFE_NOT_FOUND) }
         return AdminCafeResponse.from(cafe)
     }
 
@@ -138,8 +136,7 @@ class AdminCafeService(
      */
     @Transactional
     fun deleteCafe(cafeId: Long) {
-        val cafe = cafeRepository.findById(cafeId)
-            .orElseThrow { CustomException(ErrorCode.CAFE_NOT_FOUND) }
+        val cafe = cafeRepository.findByIdOrThrow(cafeId) { CustomException(ErrorCode.CAFE_NOT_FOUND) }
 
         // 1. 연관된 찜 목록 먼저 삭제
         wishlistRepository.deleteByCafeId(cafeId)
@@ -157,8 +154,7 @@ class AdminCafeService(
      */
     @Transactional
     fun approveCafe(cafeId: Long): AdminCafeResponse {
-        val cafe = cafeRepository.findById(cafeId)
-            .orElseThrow { CustomException(ErrorCode.CAFE_NOT_FOUND) }
+        val cafe = cafeRepository.findByIdOrThrow(cafeId) { CustomException(ErrorCode.CAFE_NOT_FOUND) }
 
         // 이미 승인된 카페 중복 처리 방지
         if (cafe.status == CafeStatus.APPROVED) {
@@ -177,8 +173,7 @@ class AdminCafeService(
      */
     @Transactional
     fun rejectCafe(cafeId: Long): AdminCafeResponse {
-        val cafe = cafeRepository.findById(cafeId)
-            .orElseThrow { CustomException(ErrorCode.CAFE_NOT_FOUND) }
+        val cafe = cafeRepository.findByIdOrThrow(cafeId) { CustomException(ErrorCode.CAFE_NOT_FOUND) }
 
         // 이미 거절된 카페 중복 처리 방지
         if (cafe.status == CafeStatus.REJECTED) {
