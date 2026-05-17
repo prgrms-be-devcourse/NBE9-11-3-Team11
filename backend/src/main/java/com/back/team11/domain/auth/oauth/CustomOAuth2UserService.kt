@@ -33,10 +33,10 @@ class CustomOAuth2UserService(
 
     private fun findOrCreateMember(attributes: OAuthAttributes): Member {
         memberRepository.findByProviderAndProviderId(attributes.provider, attributes.providerId)
-            .orElse(null)?.let { return it }
+            ?.let { return it }
 
         // 이미 다른 소셜 계정으로 가입된 이메일 체크
-        memberRepository.findByEmail(attributes.email).orElse(null)?.let {
+        memberRepository.findByEmail(attributes.email)?.let {
             throw OAuth2AuthenticationException(
                 OAuth2Error("duplicate_email"),
                 "이미 다른 소셜 계정으로 가입된 이메일입니다."
