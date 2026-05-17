@@ -9,8 +9,9 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
 import org.springframework.stereotype.Component
-import org.springframework.web.util.UriComponentsBuilder
 import java.io.IOException
+
+private const val REDIRECT_URL = "http://localhost:3000"
 
 @Component
 class OAuth2SuccessHandler(
@@ -34,21 +35,14 @@ class OAuth2SuccessHandler(
         val role = oAuth2User.attributes["role"]?.toString()
             ?: throw IllegalStateException("OAuth2 사용자 role 정보를 찾을 수 없습니다.")
 
-        val accessToken = jwtTokenProvider.generateAccessToken(memberId, role)
+        jwtTokenProvider.generateRefreshToken(memberId).also { refreshToken ->
+            tokenService.saveOrUpdateRefreshToken(memberId, refreshToken)
+            cookieUtil.addRefreshTokenCookie(response, refreshToken)
+        }
 
-        val refreshToken = jwtTokenProvider.generateRefreshToken(memberId)
+        cookieUtil.addAccessTokenCookie(response, jwtTokenProvider.generateAccessToken(memberId, role))
 
-        tokenService.saveOrUpdateRefreshToken(memberId, refreshToken)
-
-        cookieUtil.addAccessTokenCookie(response, accessToken)
-        cookieUtil.addRefreshTokenCookie(response, refreshToken)
-
-        val targetUrl = UriComponentsBuilder
-            .fromUriString("http://localhost:3000")
-            .build()
-            .toUriString()
-
-        redirectStrategy.sendRedirect(request, response, targetUrl)
+        redirectStrategy.sendRedirect(request, response, REDIRECT_URL)
     }
 
     private fun extractMemberId(oAuth2User: OAuth2User): Long {
@@ -57,11 +51,9 @@ class OAuth2SuccessHandler(
 
         return when (memberIdValue) {
             is Long -> memberIdValue
-            is Int -> memberIdValue.toLong()
-            is Number -> memberIdValue.toLong()
+            is Number -> memberIdValue.toLong()  // Int 포함 — Int는 Number 하위타입
             is String -> memberIdValue.toLongOrNull()
                 ?: throw IllegalStateException("memberId를 Long 타입으로 변환할 수 없습니다.")
-
             else -> throw IllegalStateException("지원하지 않는 memberId 타입입니다: ${memberIdValue::class.simpleName}")
         }
     }

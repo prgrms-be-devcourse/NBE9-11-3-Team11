@@ -33,17 +33,9 @@ class AdminAuthController(
     fun login(
         @RequestBody loginRequestDto: LoginRequestDto,
         response: HttpServletResponse
-    ): ResponseEntity<RsData<Unit>> {
+    ): ResponseEntity<RsData<Unit>> =
         authService.adminLogin(loginRequestDto, response)
-
-        return ResponseEntity.ok(
-            RsData(
-                "관리자 로그인이 성공적으로 되었습니다.",
-                "200",
-                null
-            )
-        )
-    }
+            .let { ResponseEntity.ok(RsData("관리자 로그인이 성공적으로 되었습니다.", "200")) }
 
     @PostMapping("/refresh")
     @Operation(summary = "관리자 리프레쉬 토큰 발급")
@@ -56,17 +48,9 @@ class AdminAuthController(
     fun refresh(
         request: HttpServletRequest,
         response: HttpServletResponse
-    ): ResponseEntity<RsData<Unit>> {
+    ): ResponseEntity<RsData<Unit>> =
         tokenReissueService.reissue(request, response)
-
-        return ResponseEntity.ok(
-            RsData(
-                "토큰 재발급이 성공적으로 되었습니다.",
-                "200",
-                null
-            )
-        )
-    }
+            .let { ResponseEntity.ok(RsData("토큰 재발급이 성공적으로 되었습니다.", "200")) }
 
     @PostMapping("/logout")
     @Operation(summary = "관리자 로그아웃")
@@ -77,15 +61,7 @@ class AdminAuthController(
     fun logout(
         request: HttpServletRequest,
         response: HttpServletResponse
-    ): ResponseEntity<RsData<Unit>> {
+    ): ResponseEntity<RsData<Unit>> =
         authService.logout(request, response)
-
-        return ResponseEntity.ok(
-            RsData(
-                "로그아웃이 성공적으로 되었습니다.",
-                "200",
-                null
-            )
-        )
-    }
+            .let { ResponseEntity.ok(RsData("로그아웃이 성공적으로 되었습니다.", "200")) }
 }

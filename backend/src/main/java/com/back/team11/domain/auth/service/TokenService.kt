@@ -14,28 +14,15 @@ class TokenService(
 ) {
 
     @Transactional
-    fun saveOrUpdateRefreshToken(
-        memberId: Long?,
-        refreshToken: String
-    ) {
-        val validMemberId = memberId
-            ?: throw IllegalArgumentException("memberId는 null일 수 없습니다.")
-
+    fun saveOrUpdateRefreshToken(memberId: Long, refreshToken: String) {
+        // nullable → non-null로 시그니처 자체를 수정
         val expiresAt = LocalDateTime.now()
             .plusSeconds(jwtTokenProvider.refreshTokenExpiration / 1000)
 
-        val token = refreshTokenRepository.findByMemberId(validMemberId)
-            .map { existingToken ->
-                existingToken.rotate(refreshToken, expiresAt)
-                existingToken
-            }
-            .orElseGet {
-                RefreshToken(
-                    memberId = validMemberId,
-                    token = refreshToken,
-                    expiresAt = expiresAt
-                )
-            }
+        // Optional.map().orElseGet() → ?.also { } ?: RefreshToken(...)
+        val token = refreshTokenRepository.findByMemberId(memberId)
+            ?.also { it.rotate(refreshToken, expiresAt) }
+            ?: RefreshToken(memberId = memberId, token = refreshToken, expiresAt = expiresAt)
 
         refreshTokenRepository.save(token)
     }

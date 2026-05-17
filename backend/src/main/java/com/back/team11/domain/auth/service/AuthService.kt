@@ -25,46 +25,29 @@ class AuthService(
 ) {
 
     @Transactional
-    fun adminLogin(
-        loginRequestDto: LoginRequestDto,
-        response: HttpServletResponse
-    ) {
+    fun adminLogin(loginRequestDto: LoginRequestDto, response: HttpServletResponse) {
         val member = memberService.findByEmail(loginRequestDto.email)
+            ?: throw CustomException(ErrorCode.INVALID_LOGIN)
 
-        if (
-            member == null ||
-            !memberService.validatePassword(loginRequestDto.password, member.password ?: throw CustomException(ErrorCode.INVALID_LOGIN))
-        ) {
+        if (!memberService.validatePassword(loginRequestDto.password, member.password ?: throw CustomException(ErrorCode.INVALID_LOGIN))) {
             throw CustomException(ErrorCode.INVALID_LOGIN)
         }
 
-        // 관리자 로그인 컨트롤러이므로 ADMIN만 허용
         if (member.role != MemberRole.ADMIN) {
             throw CustomException(ErrorCode.FORBIDDEN)
         }
 
-        val accessToken = jwtTokenProvider.generateAccessToken(
-            member.id ?: throw IllegalStateException("Member ID가 없습니다."),
-            member.role.name
-        )
+        // member.id 중복 제거 — 한 번만 검증
+        val memberId = member.id ?: throw IllegalStateException("Member ID가 없습니다.")
 
-        val refreshTokenValue = jwtTokenProvider.generateRefreshToken(member.id ?: throw IllegalStateException("Member ID가 없습니다."))
+        val accessToken = jwtTokenProvider.generateAccessToken(memberId, member.role.name)
+        val refreshTokenValue = jwtTokenProvider.generateRefreshToken(memberId)
+        val expiresAt = LocalDateTime.now().plusSeconds(jwtTokenProvider.refreshTokenExpiration / 1000)
 
-        val expiresAt = LocalDateTime.now()
-            .plusSeconds(jwtTokenProvider.refreshTokenExpiration / 1000)
-
-        val refreshToken = refreshTokenRepository.findByMemberId(member.id?: throw IllegalStateException("Member ID가 없습니다."))
-            .map { existingToken ->
-                existingToken.rotate(refreshTokenValue, expiresAt)
-                existingToken
-            }
-            .orElseGet {
-                RefreshToken(
-                    memberId = member.id ?: throw IllegalStateException("Member ID가 없습니다."),
-                    token = refreshTokenValue,
-                    expiresAt = expiresAt
-                )
-            }
+        // Optional.map().orElseGet() → 코틀린 let + elvis
+        val refreshToken = refreshTokenRepository.findByMemberId(memberId)
+            ?.also { it.rotate(refreshTokenValue, expiresAt) }
+            ?: RefreshToken(memberId = memberId, token = refreshTokenValue, expiresAt = expiresAt)
 
         refreshTokenRepository.save(refreshToken)
 
@@ -73,18 +56,10 @@ class AuthService(
     }
 
     @Transactional
-    fun logout(
-        request: HttpServletRequest,
-        response: HttpServletResponse
-    ) {
-        val refreshToken = cookieUtil.getRefreshTokenFromCookie(request)
-
-        if (refreshToken != null) {
-            refreshTokenRepository.findByToken(refreshToken)
-                .ifPresent { refreshTokenEntity ->
-                    refreshTokenRepository.delete(refreshTokenEntity)
-                }
-        }
+    fun logout(request: HttpServletRequest, response: HttpServletResponse) {
+        cookieUtil.getRefreshTokenFromCookie(request)
+            ?.let { refreshTokenRepository.findByToken(it) }
+            ?.let { refreshTokenRepository.delete(it) }
 
         cookieUtil.deleteAccessTokenCookie(response)
         cookieUtil.deleteRefreshTokenCookie(response)

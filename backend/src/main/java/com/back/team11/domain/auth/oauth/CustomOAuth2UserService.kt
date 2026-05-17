@@ -23,75 +23,34 @@ class CustomOAuth2UserService(
     override fun loadUser(userRequest: OAuth2UserRequest): OAuth2User {
         val oAuth2User = delegate.loadUser(userRequest)
 
-        val registrationId = userRequest.clientRegistration.registrationId
-
         val attributes = OAuthAttributes.of(
-            registrationId,
+            userRequest.clientRegistration.registrationId,
             oAuth2User.attributes
         )
 
-        validateAttributes(attributes)
-
-        val member = findOrCreateMember(attributes)
-
-        return createPrincipal(member)
-    }
-
-    private fun validateAttributes(attributes: OAuthAttributes) {
-        if (attributes.providerId.isNullOrBlank()) {
-            throw OAuth2AuthenticationException(
-                OAuth2Error("invalid_provider_id"),
-                "OAuth providerId가 없습니다."
-            )
-        }
+        return findOrCreateMember(attributes).let { createPrincipal(it) }
     }
 
     private fun findOrCreateMember(attributes: OAuthAttributes): Member {
-        val providerId = attributes.providerId
-            ?: throw OAuth2AuthenticationException(
-                OAuth2Error("invalid_provider_id"),
-                "OAuth providerId가 없습니다."
+        memberRepository.findByProviderAndProviderId(attributes.provider, attributes.providerId)
+            .orElse(null)?.let { return it }
+
+        // 이미 다른 소셜 계정으로 가입된 이메일 체크
+        memberRepository.findByEmail(attributes.email).orElse(null)?.let {
+            throw OAuth2AuthenticationException(
+                OAuth2Error("duplicate_email"),
+                "이미 다른 소셜 계정으로 가입된 이메일입니다."
             )
+        }
 
-        val existingMember = memberRepository.findByProviderAndProviderId(
-            attributes.provider,
-            providerId
+        return memberRepository.save(
+            Member.createOAuth(
+                email = attributes.email,
+                nickname = attributes.nickname,
+                provider = attributes.provider,
+                providerId = attributes.providerId
+            )
         )
-
-        if (existingMember.isPresent) {
-            return existingMember.get()
-        }
-
-        if (!attributes.email.isNullOrBlank()) {
-            memberRepository.findByEmail(attributes.email)
-                .ifPresent {
-                    throw OAuth2AuthenticationException(
-                        OAuth2Error("duplicate_email"),
-                        "이미 다른 소셜 계정으로 가입된 이메일입니다."
-                    )
-                }
-        }
-
-        val nickname = if (attributes.nickname.isNullOrBlank()) {
-            "${attributes.provider.name.lowercase()}_$providerId"
-        } else {
-            attributes.nickname
-        }
-
-        val email = if (attributes.email.isNullOrBlank()) {
-            "${attributes.provider.name.lowercase()}_$providerId@oauth.local"
-        } else {
-            attributes.email
-        }
-
-        val newMember = Member.createOAuth(
-            email = email,
-            nickname = nickname,
-            provider = attributes.provider,
-            providerId = providerId
-        )
-
-        return memberRepository.save(newMember)
     }
 
     private fun createPrincipal(member: Member): OAuth2User {
@@ -107,17 +66,15 @@ class CustomOAuth2UserService(
                 "OAuth provider 정보가 없습니다."
             )
 
-        val customAttributes = mapOf<String, Any>(
-            "memberId" to memberId,
-            "email" to member.email,
-            "nickname" to member.nickname,
-            "provider" to providerName,
-            "role" to member.role.name
-        )
-
         return DefaultOAuth2User(
             listOf(SimpleGrantedAuthority("ROLE_${member.role.name}")),
-            customAttributes,
+            mapOf(
+                "memberId" to memberId,
+                "email" to member.email,
+                "nickname" to member.nickname,
+                "provider" to providerName,
+                "role" to member.role.name
+            ),
             "memberId"
         )
     }
