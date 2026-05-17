@@ -26,15 +26,17 @@ class WishlistService(
     @Transactional
     fun addWishlist(cafeId: Long): WishlistResponse {
         // 멤버 임시 구현(JWT 도입 후 수정 예정)
-        val member = memberRepository.findById(authUtil.currentMemberId!!)
-            .orElseThrow { CustomException(ErrorCode.MEMBER_NOT_FOUND) }
+        val member = memberRepository.findMemberById(
+            authUtil.currentMemberId ?: throw CustomException(ErrorCode.UNAUTHORIZED)
+        ) ?: throw CustomException(ErrorCode.MEMBER_NOT_FOUND)
 
         // 카페 존재 여부 확인
-        val cafe = cafeRepository.findById(cafeId)
-            .orElseThrow { CustomException(ErrorCode.CAFE_NOT_FOUND) }
+        val cafe = cafeRepository.findByIdOrThrow(cafeId) {
+            CustomException(ErrorCode.CAFE_NOT_FOUND)
+        }
 
         // Member는 한 카페에 한번만 찜 가능
-        if (wishlistRepository.existsByMemberIdAndCafeId(member.id!!, cafeId)) {
+        if (wishlistRepository.existsByMemberIdAndCafeId(member.id, cafeId)) {
             throw CustomException(ErrorCode.WISHLIST_ALREADY_EXISTS)
         }
 
@@ -47,19 +49,21 @@ class WishlistService(
     @Transactional
     fun deleteWishlist(cafeId: Long) {
         // 멤버 임시 구현(JWT 도입 후 수정 예정)
-        val member = memberRepository.findById(authUtil.currentMemberId!!)
-            .orElseThrow { CustomException(ErrorCode.MEMBER_NOT_FOUND) }
+        val member = memberRepository.findMemberById(
+            authUtil.currentMemberId ?: throw CustomException(ErrorCode.UNAUTHORIZED)
+        ) ?: throw CustomException(ErrorCode.MEMBER_NOT_FOUND)
 
         // 카페 존재 여부 확인
-        val cafe = cafeRepository.findById(cafeId)
-            .orElseThrow { CustomException(ErrorCode.CAFE_NOT_FOUND) }
+        val cafe = cafeRepository.findByIdOrThrow(cafeId) {
+            CustomException(ErrorCode.CAFE_NOT_FOUND)
+        }
 
         // 찜 내역 없으면
-        if (!wishlistRepository.existsByMemberIdAndCafeId(member.id!!, cafeId)) {
+        if (!wishlistRepository.existsByMemberIdAndCafeId(member.id, cafeId)) {
             throw CustomException(ErrorCode.WISHLIST_NOT_FOUND)
         }
 
-        wishlistRepository.deleteByMemberIdAndCafeId(member.id!!, cafe.id)
+        wishlistRepository.deleteByMemberIdAndCafeId(member.id, cafe.id)
     }
 
     fun getWishlists(pageable: Pageable): PageResponse<WishlistResponse> {
@@ -70,7 +74,7 @@ class WishlistService(
         )
 
         val wishlists = wishlistRepository.findAllByMemberIdWithCafe(
-            authUtil.currentMemberId!!,
+            authUtil.currentMemberId ?: throw CustomException(ErrorCode.UNAUTHORIZED),
             sortedPageable
         )
 
