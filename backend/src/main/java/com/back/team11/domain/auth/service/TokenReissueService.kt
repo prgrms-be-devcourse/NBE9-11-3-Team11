@@ -35,8 +35,8 @@ class TokenReissueService(
         }
 
         // Optional.orElseThrow() + Supplier → ?: throw
-        val member = memberRepository.findById(refreshToken.memberId)
-            .orElseThrow { CustomException(ErrorCode.MEMBER_NOT_FOUND) }
+        val member = memberRepository.findMemberById(refreshToken.memberId)
+            ?: throw CustomException(ErrorCode.MEMBER_NOT_FOUND)
 
         val newAccessToken = jwtTokenProvider.generateAccessToken(refreshToken.memberId, member.role.name)
         val newRefreshToken = jwtTokenProvider.generateRefreshToken(refreshToken.memberId)
