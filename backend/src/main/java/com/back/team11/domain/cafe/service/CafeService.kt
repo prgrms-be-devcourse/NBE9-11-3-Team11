@@ -1,13 +1,10 @@
 package com.back.team11.domain.cafe.service
 
 import com.back.team11.domain.cafe.dto.CafeDetailResponse
-import com.back.team11.domain.cafe.dto.CafeDetailResponse.Companion.from
 import com.back.team11.domain.cafe.dto.CafeListResponse
 import com.back.team11.domain.cafe.dto.CafeRequest
 import com.back.team11.domain.cafe.dto.CafeResponse
-import com.back.team11.domain.cafe.dto.CafeResponse.Companion.from
 import com.back.team11.domain.cafe.entity.Cafe
-import com.back.team11.domain.cafe.entity.Cafe.Companion.createByUser
 import com.back.team11.domain.cafe.repository.CafeRepository
 import com.back.team11.domain.cafe.repository.CafeSearchCondition
 import com.back.team11.domain.member.repository.MemberRepository
@@ -15,10 +12,8 @@ import com.back.team11.domain.wishlist.repository.WishlistRepository
 import com.back.team11.global.exception.CustomException
 import com.back.team11.global.exception.ErrorCode
 import com.back.team11.global.util.AuthUtil
-import lombok.RequiredArgsConstructor
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.function.Supplier
 
 @Service
 @Transactional(readOnly = true)

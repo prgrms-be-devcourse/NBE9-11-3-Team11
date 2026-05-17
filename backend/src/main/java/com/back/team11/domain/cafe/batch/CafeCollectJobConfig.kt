@@ -3,13 +3,11 @@ package com.back.team11.domain.cafe.batch
 import com.back.team11.domain.cafe.batch.dto.KakaoPlaceDto
 import com.back.team11.domain.cafe.entity.Cafe
 import com.back.team11.domain.cafe.repository.CafeRepository
-import lombok.RequiredArgsConstructor
 import org.springframework.batch.core.job.Job
 import org.springframework.batch.core.job.builder.JobBuilder
 import org.springframework.batch.core.repository.JobRepository
 import org.springframework.batch.core.step.Step
 import org.springframework.batch.core.step.builder.StepBuilder
-import org.springframework.batch.infrastructure.item.Chunk
 import org.springframework.batch.infrastructure.item.ItemWriter
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
