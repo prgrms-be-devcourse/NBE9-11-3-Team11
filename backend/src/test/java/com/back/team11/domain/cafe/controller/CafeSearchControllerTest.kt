@@ -45,7 +45,7 @@ class CafeSearchControllerTest {
     @BeforeEach
     fun setUp() { // Java: void setUp() throws Exception → Kotlin: throws Exception 선언 불필요
         // 카페 제보자용 멤버 생성
-        val member = if (memberRepository.findByEmail("user@test.com").isEmpty) {
+        val member = if (memberRepository.findByEmail("user@test.com") == null) {
             // Java: new Member()로 기본 생성자 생성 후 setter로 필드 세팅
             // Kotlin: 주생성자 네임드 파라미터로 한번에 생성
             val newMember = Member(
@@ -56,7 +56,7 @@ class CafeSearchControllerTest {
             )
             memberRepository.save(newMember)
         } else {
-            memberRepository.findByEmail("user@test.com").get()
+            memberRepository.findByEmail("user@test.com")!!
         }
 
         // 테스트용 카페 생성 (APPROVED 상태로 직접 저장)
