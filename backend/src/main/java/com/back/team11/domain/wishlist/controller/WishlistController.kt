@@ -29,11 +29,11 @@ class WishlistController(
         ApiResponse(responseCode = "409", description = "이미 찜한 카페")
     )
     @PostMapping("/cafe/{cafeId}/wishlist")
-    fun addWishList(@PathVariable cafeId: Long): ResponseEntity<RsData<WishlistResponse>> {
-        val wishlist = wishlistService.addWishlist(cafeId)
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .body(RsData("찜이 추가되었습니다.", "201", wishlist))
-    }
+    fun addWishList(@PathVariable cafeId: Long): ResponseEntity<RsData<WishlistResponse>> =
+        wishlistService.addWishlist(cafeId).let {
+            ResponseEntity.status(HttpStatus.CREATED)
+                .body(RsData("찜이 추가되었습니다.", "201", it))
+        }
 
     // 찜 취소
     @Operation(summary = "찜 취소")
@@ -43,10 +43,10 @@ class WishlistController(
         ApiResponse(responseCode = "404", description = "존재하지 않는 찜 내역")
     )
     @DeleteMapping("/cafe/{cafeId}/wishlist")
-    fun deleteWishlist(@PathVariable cafeId: Long): ResponseEntity<RsData<Void>> {
-        wishlistService.deleteWishlist(cafeId)
-        return ResponseEntity.ok(RsData("찜이 취소되었습니다.", "200"))
-    }
+    fun deleteWishlist(@PathVariable cafeId: Long): ResponseEntity<RsData<Void>> =
+        wishlistService.deleteWishlist(cafeId).let {
+            ResponseEntity.ok(RsData("찜이 취소되었습니다.", "200"))
+        }
 
     // 내 찜 목록 조회, 필요시 페이지 기능 추가
     @Operation(summary = "내 찜 목록 조회")
@@ -57,8 +57,8 @@ class WishlistController(
     @GetMapping("/member/me/wishlist")
     fun getWishlists(
         @PageableDefault(size = 10) pageable: Pageable
-    ): ResponseEntity<RsData<PageResponse<WishlistResponse>>> {
-        val wishlists = wishlistService.getWishlists(pageable)
-        return ResponseEntity.ok(RsData("찜 목록 조회 성공", "200", wishlists))
-    }
+    ): ResponseEntity<RsData<PageResponse<WishlistResponse>>> =
+        wishlistService.getWishlists(pageable).let {
+            ResponseEntity.ok(RsData("찜 목록 조회 성공", "200", it))
+        }
 }
