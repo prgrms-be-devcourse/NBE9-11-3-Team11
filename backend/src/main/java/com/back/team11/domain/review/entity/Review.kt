@@ -39,7 +39,7 @@ class Review(
 
     @LastModifiedDate
     @Column(nullable = false)
-    val updatedAt: LocalDateTime = LocalDateTime.now(),
+    var updatedAt: LocalDateTime = LocalDateTime.now(),
 
     ) {
     fun update(content: String) {
