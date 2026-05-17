@@ -12,7 +12,6 @@ data class CafeListResponse(
 ) {
     companion object {
         // Cafe 엔티티와 찜 수로부터 CafeListResponse 생성
-        @JvmStatic
         fun from(cafe: Cafe, wishlistCount: Long): CafeListResponse {
             return CafeListResponse(
                 cafe = CafeBaseInfo.from(cafe),

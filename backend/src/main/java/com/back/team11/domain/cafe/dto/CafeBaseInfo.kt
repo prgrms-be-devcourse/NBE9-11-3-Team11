@@ -24,7 +24,6 @@ data class CafeBaseInfo(
 ) {
     companion object {
         // Cafe 엔티티로부터 CafeBaseInfo 생성
-        @JvmStatic
         fun from(cafe: Cafe): CafeBaseInfo = CafeBaseInfo(
             cafeId = cafe.id,
             name = cafe.name,

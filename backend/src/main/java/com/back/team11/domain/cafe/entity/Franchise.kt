@@ -12,7 +12,6 @@ enum class Franchise(val keyword: String?) {
     NONE(null);
 
     companion object {
-        @JvmStatic
         fun from(cafeName: String): Franchise =
             entries.firstOrNull{ it.keyword != null && cafeName.contains(it.keyword) }
                 ?: NONE

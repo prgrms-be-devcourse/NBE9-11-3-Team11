@@ -85,7 +85,6 @@ class Cafe(
         // 정적 팩토리 메서드 - 관리자 직접 등록
         // member 없이 생성, status는 APPROVED 고정
         // ─────────────────────────────────────────────
-        @JvmStatic
         fun createByAdmin(
             name: String,
             address: String,
@@ -125,7 +124,6 @@ class Cafe(
         // 정적 팩토리 메서드 - 사용자 제보
         // member 연결, status는 PENDING 고정 (관리자 심사 대기)
         // ─────────────────────────────────────────────
-        @JvmStatic
         fun createByUser(
             member: Member,
             name: String,

@@ -11,7 +11,6 @@ data class PageResponse<T>(
 ) {
     companion object {
         // Spring의 Page 객체를 PageResponse로 변환하는 정적 팩토리 메서드
-        @JvmStatic
         fun <T : Any> of(page: Page<T>): PageResponse<T> = PageResponse(
             content = page.content,
             currentPage = page.number + 1, // 0-based index를 1-based index로 변경
