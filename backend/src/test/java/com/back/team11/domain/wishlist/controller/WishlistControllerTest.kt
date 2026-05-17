@@ -1,7 +1,6 @@
 package com.back.team11.domain.wishlist.controller
 
 import com.back.team11.domain.cafe.entity.*
-import com.back.team11.domain.cafe.entity.Cafe.Companion.createByAdmin
 import com.back.team11.domain.cafe.repository.CafeRepository
 import com.back.team11.domain.member.entity.Member
 import com.back.team11.domain.member.entity.MemberRole
@@ -19,9 +18,6 @@ import org.springframework.http.MediaType
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 
@@ -29,21 +25,24 @@ import java.math.BigDecimal
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @Transactional
-internal class WishlistControllerTest {
+class WishlistControllerTest {
+
+    // @Autowired 필드는 lateinit var로 선언 - 주입 시점이 생성자 이후라 초기값 없이 선언
+    // JUnit이 테스트 클래스 인스턴스를 먼저 생성한 다음에 Spring이 의존성을 주입하는 순서라서 생성자 주입이 안됨
     @Autowired
-    private val mvc: MockMvc? = null
+    private lateinit var mvc: MockMvc
 
     @Autowired
-    private val memberRepository: MemberRepository? = null
+    private lateinit var memberRepository: MemberRepository
 
     @Autowired
-    private val cafeRepository: CafeRepository? = null
+    private lateinit var cafeRepository: CafeRepository
 
     @Autowired
-    private val wishlistRepository: WishlistRepository? = null
+    private lateinit var wishlistRepository: WishlistRepository
 
     @Autowired
-    private val passwordEncoder: PasswordEncoder? = null
+    private lateinit var passwordEncoder: PasswordEncoder
 
     private var savedCafe: Cafe? = null
     private var savedUser: Member? = null
@@ -51,20 +50,20 @@ internal class WishlistControllerTest {
     @BeforeEach
     fun setUp() {
         // 사용자 계정 생성
-        if (memberRepository!!.findByEmail("user1@test.com").isEmpty()) {
+        if (memberRepository.findByEmail("user1@test.com") == null) {
+            // Kotlin: 주생성자 네임드 파라미터로 한번에 생성
             val user = Member(
                 email = "user1@test.com",
-                nickname = "사용자1"
-            ).apply {
-                password = passwordEncoder!!.encode("1234")
-                role = MemberRole.ADMIN
-            }
+                nickname = "사용자1",
+                password = passwordEncoder.encode("1234"),
+                role = MemberRole.ADMIN,
+            )
             memberRepository.save(user)
         }
-        savedUser = memberRepository.findByEmail("user1@test.com").get()
+        savedUser = memberRepository.findByEmail("user1@test.com")
 
         // 테스트용 카페 생성
-        val cafe = createByAdmin(
+        val cafe = Cafe.createByAdmin(
             "테스트 카페",
             "서울시 강남구 테헤란로 1",
             BigDecimal("37.500000"),
@@ -79,14 +78,13 @@ internal class WishlistControllerTest {
             CongestionLevel.entries[0],
             null
         )
-        savedCafe = cafeRepository!!.save(cafe)
+        savedCafe = cafeRepository.save(cafe)
 
         memberRepository.flush()
         cafeRepository.flush()
     }
 
     // 헬퍼: 로그인 후 accessToken 반환
-    @Throws(Exception::class)
     private fun loginAndGetAccessToken(email: String?): Cookie? {
         val requestBody = """
             {
@@ -95,8 +93,8 @@ internal class WishlistControllerTest {
             }
         """.trimIndent()
 
-        val result = mvc!!.perform(
-            MockMvcRequestBuilders.post("/api/V1/admin/auth/login")
+        val result = mvc.perform(
+            post("/api/V1/admin/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
         ).andReturn()
@@ -105,196 +103,185 @@ internal class WishlistControllerTest {
 
     @Test
     @DisplayName("찜 추가 성공")
-    @Throws(Exception::class)
     fun t1() {
         val accessToken = loginAndGetAccessToken("user1@test.com")
 
-        val resultActions = mvc!!.perform(
-            MockMvcRequestBuilders.post("/api/V1/cafe/{cafeId}/wishlist", savedCafe!!.id)
+        val resultActions = mvc.perform(
+            post("/api/V1/cafe/{cafeId}/wishlist", savedCafe!!.id)
                 .cookie(accessToken!!)
-        ).andDo(MockMvcResultHandlers.print())
+        ).andDo(print())
 
         resultActions
-            .andExpect(MockMvcResultMatchers.status().isCreated())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("찜이 추가되었습니다."))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.resultCode").value("201"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.cafeId").value(savedCafe!!.id))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.cafeName").value("테스트 카페"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.wishlistId").exists())
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.msg").value("찜이 추가되었습니다."))
+            .andExpect(jsonPath("$.resultCode").value("201"))
+            .andExpect(jsonPath("$.data.cafeId").value(savedCafe!!.id))
+            .andExpect(jsonPath("$.data.cafeName").value("테스트 카페"))
+            .andExpect(jsonPath("$.data.wishlistId").exists())
     }
 
     @Test
     @DisplayName("찜 추가 실패 - 인증 없음")
-    @Throws(Exception::class)
     fun t2() {
-        val resultActions = mvc!!.perform(
-            MockMvcRequestBuilders.post("/api/V1/cafe/{cafeId}/wishlist", savedCafe!!.id)
-        ).andDo(MockMvcResultHandlers.print())
+        val resultActions = mvc.perform(
+            post("/api/V1/cafe/{cafeId}/wishlist", savedCafe!!.id)
+        ).andDo(print())
 
         resultActions
-            .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.resultCode").value("401-1"))
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.resultCode").value("401-1"))
     }
 
     @Test
     @DisplayName("찜 추가 실패 - 존재하지 않는 카페")
-    @Throws(Exception::class)
     fun t3() {
         val accessToken = loginAndGetAccessToken("user1@test.com")
 
-        val resultActions = mvc!!.perform(
-            MockMvcRequestBuilders.post("/api/V1/cafe/{cafeId}/wishlist", 99999L)
+        val resultActions = mvc.perform(
+            post("/api/V1/cafe/{cafeId}/wishlist", 99999L)
                 .cookie(accessToken!!)
-        ).andDo(MockMvcResultHandlers.print())
+        ).andDo(print())
 
         resultActions
-            .andExpect(MockMvcResultMatchers.status().isNotFound())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.resultCode").value("404-3"))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.resultCode").value("404-3"))
     }
 
     @Test
     @DisplayName("찜 추가 실패 - 이미 찜한 카페")
-    @Throws(Exception::class)
     fun t4() {
         val accessToken = loginAndGetAccessToken("user1@test.com")
 
         // 미리 찜 저장
-        wishlistRepository!!.save(Wishlist.create(savedUser!!, savedCafe!!))
+        wishlistRepository.save(Wishlist.create(savedUser!!, savedCafe!!))
         wishlistRepository.flush()
 
-        val resultActions = mvc!!.perform(
-            MockMvcRequestBuilders.post("/api/V1/cafe/{cafeId}/wishlist", savedCafe!!.id)
+        val resultActions = mvc.perform(
+            post("/api/V1/cafe/{cafeId}/wishlist", savedCafe!!.id)
                 .cookie(accessToken!!)
-        ).andDo(MockMvcResultHandlers.print())
+        ).andDo(print())
 
         // WISHLIST_ALREADY_EXISTS → 409-4
         resultActions
-            .andExpect(MockMvcResultMatchers.status().isConflict())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.resultCode").value("409-4"))
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.resultCode").value("409-4"))
     }
 
     @Test
     @DisplayName("찜 취소 성공")
-    @Throws(Exception::class)
     fun t5() {
         val accessToken = loginAndGetAccessToken("user1@test.com")
 
         // 미리 찜 저장
-        wishlistRepository!!.save(Wishlist.create(savedUser!!, savedCafe!!))
+        wishlistRepository.save(Wishlist.create(savedUser!!, savedCafe!!))
         wishlistRepository.flush()
 
-        val resultActions = mvc!!.perform(
-            MockMvcRequestBuilders.delete("/api/V1/cafe/{cafeId}/wishlist", savedCafe!!.id)
+        val resultActions = mvc.perform(
+            delete("/api/V1/cafe/{cafeId}/wishlist", savedCafe!!.id)
                 .cookie(accessToken!!)
-        ).andDo(MockMvcResultHandlers.print())
+        ).andDo(print())
 
         resultActions
-            .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("찜이 취소되었습니다."))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.resultCode").value("200"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.msg").value("찜이 취소되었습니다."))
+            .andExpect(jsonPath("$.resultCode").value("200"))
     }
 
     @Test
     @DisplayName("찜 취소 실패 - 인증 없음")
-    @Throws(Exception::class)
     fun t6() {
-        val resultActions = mvc!!.perform(
-            MockMvcRequestBuilders.delete("/api/V1/cafe/{cafeId}/wishlist", savedCafe!!.id)
-        ).andDo(MockMvcResultHandlers.print())
+        val resultActions = mvc.perform(
+            delete("/api/V1/cafe/{cafeId}/wishlist", savedCafe!!.id)
+        ).andDo(print())
 
         resultActions
-            .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.resultCode").value("401-1"))
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.resultCode").value("401-1"))
     }
 
     @Test
     @DisplayName("찜 취소 실패 - 존재하지 않는 카페")
-    @Throws(Exception::class)
     fun t7() {
         val accessToken = loginAndGetAccessToken("user1@test.com")
 
-        val resultActions = mvc!!.perform(
-            MockMvcRequestBuilders.delete("/api/V1/cafe/{cafeId}/wishlist", 99999L)
+        val resultActions = mvc.perform(
+            delete("/api/V1/cafe/{cafeId}/wishlist", 99999L)
                 .cookie(accessToken!!)
-        ).andDo(MockMvcResultHandlers.print())
+        ).andDo(print())
 
         resultActions
-            .andExpect(MockMvcResultMatchers.status().isNotFound())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.resultCode").value("404-3"))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.resultCode").value("404-3"))
     }
 
     @Test
     @DisplayName("찜 취소 실패 - 찜하지 않은 카페")
-    @Throws(Exception::class)
     fun t8() {
         val accessToken = loginAndGetAccessToken("user1@test.com")
 
-        val resultActions = mvc!!.perform(
-            MockMvcRequestBuilders.delete("/api/V1/cafe/{cafeId}/wishlist", savedCafe!!.id)
+        val resultActions = mvc.perform(
+            delete("/api/V1/cafe/{cafeId}/wishlist", savedCafe!!.id)
                 .cookie(accessToken!!)
-        ).andDo(MockMvcResultHandlers.print())
+        ).andDo(print())
 
         // WISHLIST_NOT_FOUND → 404-5
         resultActions
-            .andExpect(MockMvcResultMatchers.status().isNotFound())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.resultCode").value("404-5"))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.resultCode").value("404-5"))
     }
 
     @Test
     @DisplayName("찜 목록 조회 성공")
-    @Throws(Exception::class)
     fun t9() {
         val accessToken = loginAndGetAccessToken("user1@test.com")
 
         // 미리 찜 저장
-        wishlistRepository!!.save(Wishlist.create(savedUser!!, savedCafe!!))
+        wishlistRepository.save(Wishlist.create(savedUser!!, savedCafe!!))
         wishlistRepository.flush()
 
-        val resultActions = mvc!!.perform(
-            MockMvcRequestBuilders.get("/api/V1/member/me/wishlist")
+        val resultActions = mvc.perform(
+            get("/api/V1/member/me/wishlist")
                 .cookie(accessToken!!)
                 .param("page", "0")
                 .param("size", "10")
-        ).andDo(MockMvcResultHandlers.print())
+        ).andDo(print())
 
         resultActions
-            .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("찜 목록 조회 성공"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.resultCode").value("200"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.content").isArray())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.content[0].cafeId").value(savedCafe!!.id))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.content[0].cafeName").value("테스트 카페"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.msg").value("찜 목록 조회 성공"))
+            .andExpect(jsonPath("$.resultCode").value("200"))
+            .andExpect(jsonPath("$.data.content").isArray())
+            .andExpect(jsonPath("$.data.content[0].cafeId").value(savedCafe!!.id))
+            .andExpect(jsonPath("$.data.content[0].cafeName").value("테스트 카페"))
     }
 
     @Test
     @DisplayName("찜 목록 조회 성공 - 찜이 없으면 빈 배열")
-    @Throws(Exception::class)
     fun t10() {
         val accessToken = loginAndGetAccessToken("user1@test.com")
 
-        val resultActions = mvc!!.perform(
-            MockMvcRequestBuilders.get("/api/V1/member/me/wishlist")
+        val resultActions = mvc.perform(
+            get("/api/V1/member/me/wishlist")
                 .cookie(accessToken!!)
-        ).andDo(MockMvcResultHandlers.print())
+        ).andDo(print())
 
         resultActions
-            .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("찜 목록 조회 성공"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.resultCode").value("200"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.content").isArray())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.content").isEmpty())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.msg").value("찜 목록 조회 성공"))
+            .andExpect(jsonPath("$.resultCode").value("200"))
+            .andExpect(jsonPath("$.data.content").isArray())
+            .andExpect(jsonPath("$.data.content").isEmpty())
     }
 
     @Test
     @DisplayName("찜 목록 조회 실패 - 인증 없음")
-    @Throws(Exception::class)
     fun t11() {
-        val resultActions = mvc!!.perform(
-            MockMvcRequestBuilders.get("/api/V1/member/me/wishlist")
-        ).andDo(MockMvcResultHandlers.print())
+        val resultActions = mvc.perform(
+            get("/api/V1/member/me/wishlist")
+        ).andDo(print())
 
         resultActions
-            .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.resultCode").value("401-1"))
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.resultCode").value("401-1"))
     }
 }
