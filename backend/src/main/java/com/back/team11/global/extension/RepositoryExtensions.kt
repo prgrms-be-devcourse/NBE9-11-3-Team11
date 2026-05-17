@@ -1,4 +1,4 @@
-package com.back.team11.global.extenstion
+package com.back.team11.global.extension
 
 import org.springframework.data.repository.CrudRepository
 import java.util.Optional

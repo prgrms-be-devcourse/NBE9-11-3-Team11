@@ -11,7 +11,7 @@ import com.back.team11.domain.member.repository.MemberRepository
 import com.back.team11.domain.wishlist.repository.WishlistRepository
 import com.back.team11.global.exception.CustomException
 import com.back.team11.global.exception.ErrorCode
-import com.back.team11.global.extenstion.findByIdOrThrow
+import com.back.team11.global.extension.findByIdOrThrow
 import com.back.team11.global.util.AuthUtil
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
