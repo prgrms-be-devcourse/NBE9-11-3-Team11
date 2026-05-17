@@ -16,7 +16,7 @@ class MemberService(
 ) {
     // 이메일로 사용자 조회
     fun findByEmail(email: String): Member? =
-        memberRepository.findByEmail(email).orElse(null)
+        memberRepository.findByEmail(email)
 
     // 회원 생성 시 비밀번호 암호화하여 저장
     fun createMember(email: String, password: String, nickname: String) {
