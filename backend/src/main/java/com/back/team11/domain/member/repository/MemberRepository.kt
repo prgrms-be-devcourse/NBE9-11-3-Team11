@@ -6,9 +6,9 @@ import org.springframework.data.jpa.repository.JpaRepository
 import java.util.Optional
 
 interface MemberRepository : JpaRepository<Member, Long> {
-    fun findByProviderAndProviderId(provider: Provider, providerId: String): Optional<Member>
+    fun findByProviderAndProviderId(provider: Provider, providerId: String): Member?
 
-    fun findByEmail(email: String): Optional<Member>
+    fun findByEmail(email: String): Member?
 
     fun existsByEmail(email: String): Boolean
 }
