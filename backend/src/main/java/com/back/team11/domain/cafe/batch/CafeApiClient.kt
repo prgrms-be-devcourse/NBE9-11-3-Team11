@@ -32,27 +32,12 @@ import java.net.URI
 class CafeApiClient(
     @Value("\${kakao.rest-api-key}") // application.yml에 등록된 카카오 인증키 주입
     private val kakaoApiKey: String,
+    private val restTemplate: RestTemplate, // RestTemplateConfig에서 빈으로 등록된 RestTemplate 주입
+    // 타임아웃 설정이 한 곳(RestTemplateConfig)에서 관리됨
 ) {
     companion object {
         // 클래스 전용 로거 - 카카오 API 호출 현황을 로그로 기록
         private val logger = LoggerFactory.getLogger(CafeApiClient::class.java)
-    }
-
-    /**
-     * 타임아웃이 설정된 RestTemplate을 생성합니다.
-     *
-     * 타임아웃을 설정하지 않으면 카카오 API 응답이 무한정 지연될 때
-     * 해당 스레드가 영구적으로 블로킹될 수 있습니다.
-     *
-     * - connectTimeout: 카카오 서버에 연결을 시도하는 최대 대기 시간 (3초)
-     * - readTimeout: 카카오 서버로부터 응답 데이터를 읽는 최대 대기 시간 (5초)
-     */
-    private val restTemplate: RestTemplate = run {
-        val factory = SimpleClientHttpRequestFactory().apply {
-            setConnectTimeout(3000) // 연결 타임아웃 3초
-            setReadTimeout(5000)    // 읽기 타임아웃 5초
-        }
-        RestTemplate(factory)
     }
 
     /**
