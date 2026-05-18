@@ -21,6 +21,9 @@ interface WishlistRepository : JpaRepository<Wishlist, Long> {
 
     // @Modifying은 조회가 아닌 데이터 변경(INSERT, UPDATE, DELETE)임을 나타냄
     // clearAutomatically = true는 벌크 연산 후 영속성 컨텍스트를 비워 데이터 불일치를 방지
+    // ⚠️ 이 쿼리 실행 이후, 동일 트랜잭션에서 조회했던 Wishlist, Cafe 등의 엔티티는
+   // detached 상태가 되므로 재사용하거나 삭제 시 추가 SELECT가 발생하거나
+   // 기능 확장 시 예상치 못한 오류로 이어질 수 있음
     @Modifying(clearAutomatically = true)
     @Query("DELETE FROM Wishlist w WHERE w.cafe.id = :cafeId")
     fun deleteByCafeId(@Param("cafeId") cafeId: Long)
