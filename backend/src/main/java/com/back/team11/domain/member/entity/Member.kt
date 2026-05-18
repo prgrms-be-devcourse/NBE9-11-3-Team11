@@ -54,12 +54,12 @@ class Member(
         )
 
         fun createOAuth(
-            email: String,
+            email: String?,
             nickname: String,
             provider: Provider,
             providerId: String
         ): Member = Member(
-            email = email,
+            email =  email ?: "",
             nickname = nickname,
             role = MemberRole.USER,
             provider = provider,

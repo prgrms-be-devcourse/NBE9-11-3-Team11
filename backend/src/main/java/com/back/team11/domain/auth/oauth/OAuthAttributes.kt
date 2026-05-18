@@ -5,7 +5,7 @@ import com.back.team11.domain.member.entity.Provider
 data class OAuthAttributes(
     val provider: Provider,
     val providerId: String,
-    val email: String,
+    val email: String?,
     val nickname: String,
     val attributes: Map<String, Any?>
 ) {
@@ -39,6 +39,7 @@ data class OAuthAttributes(
          * }
          */
         private fun ofKakao(attributes: Map<String, Any?>): OAuthAttributes {
+
             val kakaoAccount = attributes.getMap("kakao_account")
             val profile = kakaoAccount.getMap("profile")
 
@@ -46,8 +47,7 @@ data class OAuthAttributes(
                 provider = Provider.KAKAO,
                 providerId = attributes["id"]?.toString()
                     ?: throw IllegalArgumentException("카카오 providerId가 없습니다."),
-                email = kakaoAccount.getString("email")
-                    ?: throw IllegalArgumentException("카카오 email이 없습니다."),
+                email = kakaoAccount.getString("email"),
                 nickname = profile.getString("nickname")
                     ?: throw IllegalArgumentException("카카오 nickname이 없습니다."),
                 attributes = attributes
@@ -65,6 +65,7 @@ data class OAuthAttributes(
         @Suppress("UNCHECKED_CAST")
         private fun Map<String, Any?>.getMap(key: String): Map<String, Any?> =
             this[key] as? Map<String, Any?> ?: emptyMap()
+
 
         private fun Map<String, Any?>.getString(key: String): String? =
             this[key]?.toString()

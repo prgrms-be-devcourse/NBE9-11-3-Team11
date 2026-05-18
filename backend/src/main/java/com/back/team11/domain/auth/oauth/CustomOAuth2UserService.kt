@@ -28,24 +28,42 @@ class CustomOAuth2UserService(
             oAuth2User.attributes
         )
 
+        validateAttributes(attributes)
+
         return findOrCreateMember(attributes).let { createPrincipal(it) }
+    }
+
+    private fun validateAttributes(attributes: OAuthAttributes) {
+        if (attributes.providerId.isBlank()) {
+            throw OAuth2AuthenticationException(
+                OAuth2Error("invalid_provider_id"),
+                "OAuth providerId가 없습니다."
+            )
+        }
     }
 
     private fun findOrCreateMember(attributes: OAuthAttributes): Member {
         memberRepository.findByProviderAndProviderId(attributes.provider, attributes.providerId)
             ?.let { return it }
 
-        // 이미 다른 소셜 계정으로 가입된 이메일 체크
-        memberRepository.findByEmail(attributes.email)?.let {
-            throw OAuth2AuthenticationException(
-                OAuth2Error("duplicate_email"),
-                "이미 다른 소셜 계정으로 가입된 이메일입니다."
-            )
+        // 이메일 있을 때만 중복 체크
+        if (!attributes.email.isNullOrBlank()) {
+            memberRepository.findByEmail(attributes.email)?.let {
+                throw OAuth2AuthenticationException(
+                    OAuth2Error("duplicate_email"),
+                    "이미 다른 소셜 계정으로 가입된 이메일입니다."
+                )
+            }
         }
+
+
+        // 이메일 없으면 임시 이메일 생성
+        val email = attributes.email.takeIf { !it.isNullOrBlank() }
+            ?: "${attributes.provider.name.lowercase()}_${attributes.providerId}@oauth.local"
 
         return memberRepository.save(
             Member.createOAuth(
-                email = attributes.email,
+                email = email,
                 nickname = attributes.nickname,
                 provider = attributes.provider,
                 providerId = attributes.providerId
