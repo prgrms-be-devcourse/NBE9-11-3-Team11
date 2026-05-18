@@ -2,42 +2,30 @@ package com.back.team11.global.util
 
 import com.back.team11.global.exception.CustomException
 import com.back.team11.global.exception.ErrorCode
-import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 
 @Component
 class AuthUtil {
-    val currentMemberId: Long?
-        get() {
-            val authentication =
-                SecurityContextHolder.getContext().getAuthentication()
 
-            if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal() == "anonymousUser") {
-                throw CustomException(ErrorCode.UNAUTHORIZED)
-            }
+    private val authentication: Authentication?
+        get() = SecurityContextHolder.getContext().authentication
 
-            return authentication.getPrincipal() as Long?
-        }
+    val currentMemberId: Long
+        get() = authentication
+            ?.takeIf { it.isAuthenticated && it.principal != "anonymousUser" }
+            ?.principal as? Long
+            ?: throw CustomException(ErrorCode.UNAUTHORIZED)
 
     val currentMemberIdOrNull: Long?
-        get() {
-            val authentication =
-                SecurityContextHolder.getContext().getAuthentication()
-
-            if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal() == "anonymousUser") {
-                return null
-            }
-
-            return authentication.getPrincipal() as Long?
-        }
+        get() = authentication
+            ?.takeIf { it.isAuthenticated && it.principal != "anonymousUser" }
+            ?.principal as? Long
 
     val isAdmin: Boolean
-        get() {
-            val authentication =
-                SecurityContextHolder.getContext().getAuthentication()
-            return authentication!!.getAuthorities()
-                .stream()
-                .anyMatch { authority: GrantedAuthority? -> authority!!.getAuthority() == "ROLE_ADMIN" }
-        }
+        get() = authentication
+            ?.authorities
+            ?.any { it.authority == "ROLE_ADMIN" }
+            ?: false
 }
