@@ -50,7 +50,7 @@ class AdminCafeControllerTest {
     // Java: void setUp() throws Exception → Kotlin: throws Exception 선언 불필요, fun으로 변경
     fun setUp() {
         // 관리자 계정 생성
-        if (memberRepository.findByEmail("admin@test.com").isEmpty) {
+        if (memberRepository.findByEmail("admin@test.com") == null) {
             // Java: new Member()로 기본 생성자 생성 후 setter로 필드 세팅
             // Kotlin: 기본 생성자 없이 주생성자 네임드 파라미터로 한번에 생성
             val admin = Member(

@@ -13,9 +13,7 @@ import java.time.LocalDateTime
 @Entity
 @Table(
     name = "review",
-    uniqueConstraints = [
-        UniqueConstraint(columnNames = ["member_id", "cafe_id"])
-    ]
+    uniqueConstraints = [UniqueConstraint(columnNames = ["member_id", "cafe_id"])]
 )
 @EntityListeners(AuditingEntityListener::class)
 class Review(
@@ -26,14 +24,14 @@ class Review(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    val member: Member ?= null,
+    val member: Member,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cafe_id", nullable = false)
-    val cafe: Cafe ?= null,
+    val cafe: Cafe,
 
     @Column(nullable = false, columnDefinition = "TEXT")
-    var content: String = "",
+    var content: String,
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
@@ -41,21 +39,9 @@ class Review(
 
     @LastModifiedDate
     @Column(nullable = false)
-    var updatedAt: LocalDateTime = LocalDateTime.now()
+    var updatedAt: LocalDateTime = LocalDateTime.now(),
 
-) {
-
-    constructor(
-        member: Member,
-        cafe: Cafe,
-        content: String
-    ) : this(
-        id = 0L,
-        member = member,
-        cafe = cafe,
-        content = content
-    )
-
+    ) {
     fun update(content: String) {
         this.content = content
     }

@@ -17,7 +17,7 @@ class CafeItemProcessor(
 
     override fun process(dto: KakaoPlaceDto): Cafe? {
         // 주소 결정: 도로명 주소가 있으면 사용하고, 없으면 지번 주소를 사용
-        val address = if (!dto.roadAddressName.isNullOrBlank()) dto.roadAddressName else dto.addressName
+        val address = if (dto.roadAddressName.isNotBlank()) dto.roadAddressName else dto.addressName
 
         // 중복 검사: DB에 이미 같은 이름과 주소를 가진 카페가 있는지 확인
         // 이미 존재한다면 null을 반환하여 Writer(저장) 단계로 넘어가지 않게 처리 (필터링)

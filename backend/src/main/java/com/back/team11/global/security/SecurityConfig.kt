@@ -2,6 +2,7 @@ package com.back.team11.global.security
 
 import com.back.team11.domain.auth.oauth.CustomOAuth2UserService
 import com.back.team11.domain.auth.oauth.OAuth2SuccessHandler
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -50,33 +51,25 @@ class SecurityConfig(
             .formLogin { it.disable() } // 폼 로그인 비활성화
             .httpBasic { it.disable() } // HTTP Basic 인증 비활성화
             .oauth2Login { oauth2 ->
-                oauth2.authorizationEndpoint { it.baseUri("/api/V1/auth/oauth") } // OAuth 시작 엔드포인트
-                oauth2.redirectionEndpoint { it.baseUri("/api/V1/auth/oauth/*/callback") } // OAuth 콜백 URL
-                oauth2.defaultSuccessUrl("/loginSuccess", true)
-                oauth2.failureUrl("/login?error")
-                oauth2.userInfoEndpoint { it.userService(customOAuth2UserService) } // 사용자 정보 처리 서비스
-                oauth2.successHandler(oAuth2SuccessHandler) // 로그인 성공 시 JWT 발급
-                oauth2.failureHandler { _, response, _ -> // 로그인 실패 시 401 응답
-                    response.contentType = "application/json"
-                    response.characterEncoding = "UTF-8"
-                    response.status = 401
-                    response.writer.write("""{"resultCode": "401-1", "msg": "소셜 로그인에 실패했습니다."}""")
+                with(oauth2) {
+                    authorizationEndpoint { it.baseUri("/api/V1/auth/oauth") } // OAuth 시작 엔드포인트
+                    redirectionEndpoint { it.baseUri("/api/V1/auth/oauth/*/callback") } // OAuth 콜백 URL
+                    defaultSuccessUrl("/loginSuccess", true)
+                    failureUrl("/login?error")
+                    userInfoEndpoint { it.userService(customOAuth2UserService) } // 사용자 정보 처리 서비스
+                    successHandler(oAuth2SuccessHandler) // 로그인 성공 시 JWT 발급
+                    failureHandler { _, response, _ -> // 로그인 실패 시 401 응답
+                        response.sendJsonError(401, "401-1", "소셜 로그인에 실패했습니다.")
+                    }
                 }
             }
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java) // JWT 필터를 기본 로그인 필터 앞에 실행
             .exceptionHandling { exception ->
-                //람다 파라미터인데 사용하지 않는 파라미터 _로 표시
                 exception.authenticationEntryPoint { _, response, _ -> // 인증 실패 (토큰 없음/만료) → 401
-                    response.contentType = "application/json"
-                    response.characterEncoding = "UTF-8"
-                    response.status = 401
-                    response.writer.write("""{"resultCode": "401-1", "msg": "로그인 후 이용해주세요."}""")
+                    response.sendJsonError(401, "401-1", "로그인 후 이용해주세요.")
                 }
                 exception.accessDeniedHandler { _, response, _ -> // 권한 부족 → 403
-                    response.contentType = "application/json"
-                    response.characterEncoding = "UTF-8"
-                    response.status = 403
-                    response.writer.write("""{"resultCode": "403-1", "msg": "접근 권한이 없습니다."}""")
+                    response.sendJsonError(403, "403-1", "접근 권한이 없습니다.")
                 }
             }
 
@@ -86,23 +79,26 @@ class SecurityConfig(
     @Bean
     fun corsConfigurationSource(): UrlBasedCorsConfigurationSource {
         val configuration = CorsConfiguration().apply {
-            // 현재 로컬 개발 환경만 허용
-            allowedOrigins = listOf("http://localhost:3000")
-            // 허용할 HTTP 메서드 목록
-            allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
-            // 모든 요청 헤더 허용
-            allowedHeaders = listOf("*")
-            // 쿠키/인증 정보 포함 요청 허용
-            allowCredentials = true
+            allowedOrigins = listOf("http://localhost:3000") // 현재 로컬 개발 환경만 허용
+            allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS") // 허용할 HTTP 메서드 목록
+            allowedHeaders = listOf("*") // 모든 요청 헤더 허용
+            allowCredentials = true // 쿠키/인증 정보 포함 요청 허용
         }
 
-        // /api/** 경로에 위 CORS 설정 적용
         return UrlBasedCorsConfigurationSource().apply {
-            registerCorsConfiguration("/api/**", configuration)
+            registerCorsConfiguration("/api/**", configuration) // /api/** 경로에 위 CORS 설정 적용
         }
     }
 
     // BCrypt 암호화 방식으로 비밀번호 인코딩, 구현체 사용
     @Bean
     fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
+}
+
+// 필터/핸들러에서 @ExceptionHandler가 동작 안 해서 직접 response에 작성해야 함
+private fun HttpServletResponse.sendJsonError(status: Int, resultCode: String, msg: String) {
+    contentType = "application/json"
+    characterEncoding = "UTF-8"
+    this.status = status
+    writer.write("""{"resultCode": "$resultCode", "msg": "$msg"}""")
 }

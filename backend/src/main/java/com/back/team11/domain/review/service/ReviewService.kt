@@ -45,10 +45,13 @@ class ReviewService(
             throw CustomException(ErrorCode.REVIEW_ALREADY_EXISTS)
         }
 
-        val review = Review(member, cafe, requestDto.content)
-        reviewRepository.save(review)
+        val review = Review(
+            member = member,
+            cafe = cafe,
+            content = requestDto.content
+        )
 
-        return from(review)
+        return ReviewResponseDto.from(reviewRepository.save(review))
     }
 
     // 리뷰 조회
@@ -58,7 +61,7 @@ class ReviewService(
             .orElseThrow { CustomException(ErrorCode.CAFE_NOT_FOUND) }
 
         return reviewRepository.findAllByCafeIdWithFetch(cafeId)
-            .map { review -> from(review) }
+            .map { ReviewResponseDto.from(it) }
     }
 
     // 페이징 리뷰 조회
@@ -67,17 +70,16 @@ class ReviewService(
         cafeRepository.findById(cafeId)
             .orElseThrow { CustomException(ErrorCode.CAFE_NOT_FOUND) }
 
-        val sortedPageable: Pageable = PageRequest.of(
+        val sortedPageable = PageRequest.of(
             pageable.pageNumber,
             pageable.pageSize,
             Sort.by(Sort.Direction.DESC, "createdAt")
         )
 
-        val page = reviewRepository
+        return reviewRepository
             .findAllByCafeIdWithFetch(cafeId, sortedPageable)
-            .map<ReviewResponseDto> { review -> from(review) }
-
-        return PageResponse.from(page)
+            .map { ReviewResponseDto.from(it) }
+            .let { PageResponse.from(it) }
     }
 
     // 리뷰 수정
@@ -85,7 +87,7 @@ class ReviewService(
         val resolvedMemberId = memberId ?: throw CustomException(ErrorCode.MEMBER_NOT_FOUND)
 
         val review = reviewRepository.findByIdAndCafeIdWithFetch(reviewId, cafeId)
-            .orElseThrow { CustomException(ErrorCode.REVIEW_NOT_FOUND) }
+            ?: throw CustomException(ErrorCode.REVIEW_NOT_FOUND)
 
         if (review.member?.id != resolvedMemberId) {
             throw CustomException(ErrorCode.FORBIDDEN_REVIEW)
@@ -93,7 +95,7 @@ class ReviewService(
 
         review.update(requestDto.content)
 
-        return from(review)
+        return ReviewResponseDto.from(review)
     }
 
     // 리뷰 삭제
@@ -101,7 +103,7 @@ class ReviewService(
         val resolvedMemberId = memberId ?: throw CustomException(ErrorCode.MEMBER_NOT_FOUND)
 
         val review = reviewRepository.findByIdAndCafeId(reviewId, cafeId)
-            .orElseThrow { CustomException(ErrorCode.REVIEW_NOT_FOUND) }
+            ?: throw CustomException(ErrorCode.REVIEW_NOT_FOUND)
 
         if (review.member?.id != resolvedMemberId && !authUtil.isAdmin) {
             throw CustomException(ErrorCode.FORBIDDEN_REVIEW)
