@@ -15,6 +15,10 @@ import java.time.LocalDateTime
     uniqueConstraints = [UniqueConstraint(columnNames = ["member_id", "cafe_id"])]
 )
 class Wishlist(
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long = 0,
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     var member: Member? = null,
@@ -30,13 +34,8 @@ class Wishlist(
     @LastModifiedDate
     @Column(nullable = false)
     var updatedAt: LocalDateTime? = null,
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
 ) {
     companion object {
-        @JvmStatic
         fun create(member: Member, cafe: Cafe): Wishlist =
             Wishlist(member = member, cafe = cafe)
     }

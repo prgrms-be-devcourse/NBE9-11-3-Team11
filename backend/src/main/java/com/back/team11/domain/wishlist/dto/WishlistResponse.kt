@@ -10,14 +10,11 @@ data class WishlistResponse(
     val createAt: LocalDateTime?
 ) {
     companion object {
-        @JvmStatic
-        fun from(wishlist: Wishlist): WishlistResponse {
-            return WishlistResponse(
-                wishlistId = wishlist.id,
-                cafeId = wishlist.cafe?.id ?: 0,
-                cafeName = wishlist.cafe?.name ?: "",
-                createAt = wishlist.createdAt
-            )
-        }
+        fun from(wishlist: Wishlist) = WishlistResponse(
+            wishlistId = wishlist.id,
+            cafeId = wishlist.cafe?.id ?: 0,
+            cafeName = wishlist.cafe?.name ?: "",
+            createAt = wishlist.createdAt
+        )
     }
 }
