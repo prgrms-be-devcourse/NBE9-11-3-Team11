@@ -108,12 +108,10 @@ class CafeApiClient(
                     KakaoSearchResponse::class.java,
                 ).body
 
-                // 응답이 없거나 결과가 없거나 마지막 페이지면 다음 좌표로 이동
-                if (response == null || response.documents.isEmpty() || response.meta.isEnd) break
-
-                // 수집된 카페 데이터를 결과 리스트에 추가
-                result.addAll(response.documents)
-                currentPage++ // 다음 페이지로 이동
+                if (response == null || response.documents.isEmpty()) break
+                result.addAll(response.documents)  // 데이터 먼저 추가
+                if (response.meta.isEnd) break     // 그 다음 마지막 페이지 체크
+                currentPage++
             }
         }
 
