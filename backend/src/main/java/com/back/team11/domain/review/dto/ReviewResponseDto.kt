@@ -12,9 +12,8 @@ data class ReviewResponseDto(
     val createdAt: LocalDateTime
 ) {
     companion object {
-        @JvmStatic
-        fun from(review: Review): ReviewResponseDto {
-            return ReviewResponseDto(
+        fun from(review: Review): ReviewResponseDto =
+            ReviewResponseDto(
                 review.id,
                 review.cafe?.id,
                 review.member?.id,
@@ -22,6 +21,5 @@ data class ReviewResponseDto(
                 review.content,
                 review.createdAt
             )
-        }
     }
 }
