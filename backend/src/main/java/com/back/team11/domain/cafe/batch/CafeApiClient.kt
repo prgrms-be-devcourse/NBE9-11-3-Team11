@@ -9,6 +9,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.client.SimpleClientHttpRequestFactory
 import org.springframework.stereotype.Component
+import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
@@ -101,17 +102,26 @@ class CafeApiClient(
                 headers.set("Authorization", "KakaoAK $kakaoApiKey")
 
                 // 카카오 API 호출
-                val response = restTemplate.exchange(
-                    URI.create(url),
-                    HttpMethod.GET,
-                    HttpEntity<Any>(headers),
-                    KakaoSearchResponse::class.java,
-                ).body
+                // 변경 후
+                try {
+                    val response = restTemplate.exchange(
+                        URI.create(url),
+                        HttpMethod.GET,
+                        HttpEntity<Any>(headers),
+                        KakaoSearchResponse::class.java,
+                    ).body
 
-                if (response == null || response.documents.isEmpty()) break
-                result.addAll(response.documents)  // 데이터 먼저 추가
-                if (response.meta.isEnd) break     // 그 다음 마지막 페이지 체크
-                currentPage++
+                    if (response == null || response.documents.isEmpty()) break
+                    result.addAll(response.documents)
+                    if (response.meta.isEnd) break
+                    currentPage++
+
+                } catch (e: RestClientException) {
+                    // 특정 좌표 API 호출 실패 시 해당 좌표만 스킵하고 다음 좌표로 이동
+                    // 한 좌표 실패가 전체 배치 실패로 이어지지 않도록 방어
+                    logger.error("카카오 API 호출 실패 - gridIndex: {}, page: {}, error: {}", gridIndex, currentPage, e.message)
+                    break
+                }
             }
         }
 
