@@ -10,7 +10,6 @@ data class CafeResponse(
 ) {
     companion object {
         // Cafe 엔티티로부터 CafeResponse 생성
-        @JvmStatic
         fun from(cafe: Cafe): CafeResponse = CafeResponse(
             cafe = CafeBaseInfo.from(cafe),
             createdAt = cafe.createdAt, // 제보일을 기준으로 날짜를 표시
