@@ -43,7 +43,7 @@ internal class ReviewControllerTest {
     @BeforeEach
     fun setUp() {
         fun createMemberIfAbsent(email: String, nickname: String): Member {
-            if (memberRepository.findByEmail(email).isEmpty) {
+            if (memberRepository.findByEmail(email) == null) {
                 memberRepository.save(
                     Member(email = email, nickname = nickname).apply {
                         password = passwordEncoder.encode("1234")
@@ -51,7 +51,7 @@ internal class ReviewControllerTest {
                     }
                 )
             }
-            return memberRepository.findByEmail(email).get()
+            return memberRepository.findByEmail(email)!!
         }
 
         savedUser = createMemberIfAbsent("user1@test.com", "사용자1")
