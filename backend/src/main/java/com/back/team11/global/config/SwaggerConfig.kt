@@ -6,9 +6,11 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 @OpenAPIDefinition(
-    info = Info( // = @Info 에서 = Info로 변경
+    // 리팩토링: annotation argument 포맷을 Kotlin 스타일로 정리, 유지보수 용이성을 위해 trailing comma 적용
+    info = Info(
         title = "Cafe Study API",
         description = "Cafe Study 프로젝트 API 명세서",
-        version = "v1.0.0")
+        version = "v1.0.0",
+    )
 )
-class SwaggerConfig 
+class SwaggerConfig

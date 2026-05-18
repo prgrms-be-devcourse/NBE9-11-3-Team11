@@ -5,24 +5,19 @@ import com.back.team11.domain.cafe.repository.CafeRepository
 import com.back.team11.domain.member.repository.MemberRepository
 import com.back.team11.domain.review.dto.ReviewRequestDto
 import com.back.team11.domain.review.dto.ReviewResponseDto
-import com.back.team11.domain.review.dto.ReviewResponseDto.Companion.from
 import com.back.team11.domain.review.entity.Review
 import com.back.team11.domain.review.repository.ReviewRepository
 import com.back.team11.global.dto.PageResponse
+import com.back.team11.global.dto.toPageResponse
 import com.back.team11.global.exception.CustomException
 import com.back.team11.global.exception.ErrorCode
 import com.back.team11.global.extension.findByIdOrThrow
 import com.back.team11.global.util.AuthUtil
-import lombok.RequiredArgsConstructor
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.function.Function
-import java.util.function.Supplier
-import java.util.stream.Collectors
-
 
 @Service
 @Transactional
@@ -77,7 +72,7 @@ class ReviewService(
         return reviewRepository
             .findAllByCafeIdWithFetch(cafeId, sortedPageable)
             .map { ReviewResponseDto.from(it) }
-            .let { PageResponse.from(it) }
+            .toPageResponse()
     }
 
     // 리뷰 수정

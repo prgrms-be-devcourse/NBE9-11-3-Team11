@@ -6,6 +6,7 @@ import com.back.team11.domain.wishlist.dto.WishlistResponse
 import com.back.team11.domain.wishlist.entity.Wishlist
 import com.back.team11.domain.wishlist.repository.WishlistRepository
 import com.back.team11.global.dto.PageResponse
+import com.back.team11.global.dto.toPageResponse
 import com.back.team11.global.exception.CustomException
 import com.back.team11.global.exception.ErrorCode
 import com.back.team11.global.extension.findByIdOrThrow
@@ -79,6 +80,6 @@ class WishlistService(
             sortedPageable
         )
 
-        return PageResponse.from(wishlists.map { WishlistResponse.from(it) })
+        return wishlists.map { WishlistResponse.from(it) }.toPageResponse()
     }
 }
