@@ -1,0 +1,21 @@
+# Prometheus가 메트릭을 수집할 대상을 정의하는 설정 파일
+# docker-compose.yml에서 이 파일을 Prometheus 컨테이너 안으로 마운트해서 사용
+scrape_configs:
+  # 수집 작업 목록 (여러 개 추가 가능)
+  - job_name: 'spring-boot'
+    # 이 수집 작업의 이름 (Grafana에서 구분할 때 사용)
+
+    metrics_path: '/actuator/prometheus'
+    # Spring Boot Actuator가 메트릭을 노출하는 엔드포인트
+    # application.yml에서 해당 엔드포인트를 열어줘야 수집 가능
+    # management.endpoints.web.exposure.include: prometheus, health
+
+    scrape_interval: 15s
+    # 15초마다 메트릭 수집
+    # 짧을수록 실시간에 가깝지만 부하가 높아짐
+
+    static_configs:
+      - targets: ['host.docker.internal:8080']
+        # host.docker.internal → 컨테이너 안에서 로컬 호스트(내 컴퓨터)를 가리키는 특수 주소
+        # 8080 → Spring Boot가 실행 중인 포트
+        # 즉, Prometheus 컨테이너가 로컬에서 실행 중인 Spring Boot의 메트릭을 수집

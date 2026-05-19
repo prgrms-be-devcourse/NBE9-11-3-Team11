@@ -87,3 +87,11 @@ server:
 
 springdoc:
   default-produces-media-type: application/json; charset=UTF-8
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus, health
+        # prometheus: Prometheus가 메트릭 수집할 엔드포인트 노출 (/actuator/prometheus)
+        # health: 서버 상태 확인 엔드포인트 노출 (/actuator/health)
