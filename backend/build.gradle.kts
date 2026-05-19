@@ -72,6 +72,12 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
+
+    // 모니터링 - Spring Actuator (메트릭 엔드포인트 노출)
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    // 모니터링 - Prometheus 메트릭 수집 포맷 지원
+    implementation("io.micrometer:micrometer-registry-prometheus")
+
     // Swagger
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2")
 
@@ -123,4 +129,10 @@ allOpen {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+// 일반 JAR 비활성화 - bootJar만 생성하여 Dockerfile에서 *.jar 와일드카드 사용 가능
+// 버전 바뀌어도 Dockerfile 수정 불필요
+tasks.named<Jar>("jar") {
+    enabled = false
 }
