@@ -17,6 +17,7 @@ services:
     environment:
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}  # Redis 비밀번호 (.env에서 읽어옴)
 
     # 외부에 8080 포트를 직접 공개하지 않고
     # nginx 컨테이너가 내부 네트워크로 backend:8080에 접근하게 함
