@@ -48,17 +48,5 @@ class TokenService(
     fun isBlacklisted(accessToken: String): Boolean =
         redisTemplate.hasKey("$BLACKLIST_PREFIX$accessToken") == true
 
-//    @Transactional
-//    fun saveOrUpdateRefreshToken(memberId: Long, refreshToken: String) {
-//        // nullable → non-null로 시그니처 자체를 수정
-//        val expiresAt = LocalDateTime.now()
-//            .plusSeconds(jwtTokenProvider.refreshTokenExpiration / 1000)
-//
-//        // Optional.map().orElseGet() → ?.also { } ?: RefreshToken(...)
-//        val token = refreshTokenRepository.findByMemberId(memberId)
-//            ?.also { it.rotate(refreshToken, expiresAt) }
-//            ?: RefreshToken(memberId = memberId, token = refreshToken, expiresAt = expiresAt)
-//
-//        refreshTokenRepository.save(token)
-//    }
+
 }
