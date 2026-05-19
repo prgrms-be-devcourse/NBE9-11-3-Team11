@@ -25,6 +25,10 @@ services:
     ports:
       - "6379:6379"# 호스트:컨테이너 포트 매핑
       # 로컬에서 localhost:6379으로 접근 가능
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis-data:/data
+    restart: always
 
   prometheus:
     image: prom/prometheus
@@ -49,6 +53,6 @@ services:
 
 volumes:
   mysql_data:  # Docker가 mysql_data 볼륨 관리하겠다고 선언
-
+  redis-data:
 
 
