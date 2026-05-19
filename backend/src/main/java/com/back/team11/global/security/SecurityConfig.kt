@@ -34,6 +34,7 @@ class SecurityConfig(
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) } // JWT 기반이므로 세션 미사용
             .authorizeHttpRequests { auth ->
                 auth
+                    .requestMatchers("/actuator/**").permitAll() // Prometheus 메트릭 수집 허용
                     .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll() // Swagger - 인증 없이 접근 허용
                     .requestMatchers(HttpMethod.GET, "/api/V1/auth/me").authenticated() // 내 정보 조회 - 인증 필요
                     .requestMatchers(HttpMethod.POST, "/api/V1/auth/logout").authenticated() // 로그아웃 - 인증 필요

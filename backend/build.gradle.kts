@@ -74,6 +74,12 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
+
+    // 모니터링 - Spring Actuator (메트릭 엔드포인트 노출)
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    // 모니터링 - Prometheus 메트릭 수집 포맷 지원
+    implementation("io.micrometer:micrometer-registry-prometheus")
+
     // Swagger
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2")
 
