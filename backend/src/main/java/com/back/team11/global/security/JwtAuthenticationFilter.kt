@@ -1,5 +1,6 @@
 package com.back.team11.global.security
 
+import com.back.team11.domain.auth.service.TokenService
 import com.back.team11.global.exception.ErrorCode
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.ExpiredJwtException
@@ -16,7 +17,8 @@ import java.io.IOException
 
 @Component
 class JwtAuthenticationFilter(
-    private val jwtTokenProvider: JwtTokenProvider
+    private val jwtTokenProvider: JwtTokenProvider,
+    private val tokenService: TokenService
 ) : OncePerRequestFilter() {
 
     private val objectMapper = ObjectMapper() // 빈 주입 대신 직접 생성, 별도 빈 등록 불필요
@@ -30,6 +32,12 @@ class JwtAuthenticationFilter(
         // 쿠키에서 accessToken 추출, 없으면 다음 필터로 넘김 → SecurityConfig에서 permitAll 여부 판단
         resolveToken(request)?.let { token ->
             try {
+                // 블랙리스트 체크 추가
+                if (tokenService.isBlacklisted(token)) {
+                    sendErrorResponse(response, ErrorCode.INVALID_TOKEN)
+                    return
+                }
+
                 val memberId = jwtTokenProvider.getMemberId(token)
                 val role = jwtTokenProvider.getRole(token)
 
