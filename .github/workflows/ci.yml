@@ -14,6 +14,18 @@ jobs:
     # GitHub에서 제공하는 우분투 서버에서 실행
     # 내 컴퓨터가 꺼져있어도 GitHub 서버에서 알아서 실행됨
 
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: cafe_study
+          MYSQL_USER: ${{ secrets.DB_USERNAME }}
+          MYSQL_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
+
     steps:
       - name: 코드 체크아웃
         uses: actions/checkout@v4
