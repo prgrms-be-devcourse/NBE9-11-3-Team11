@@ -127,3 +127,9 @@ allOpen {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+// 일반 JAR 비활성화 - bootJar만 생성하여 Dockerfile에서 *.jar 와일드카드 사용 가능
+// 버전 바뀌어도 Dockerfile 수정 불필요
+tasks.named<Jar>("jar") {
+    enabled = false
+}
