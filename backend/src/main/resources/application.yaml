@@ -5,11 +5,31 @@ spring:
   config:
     import: optional:file:.env[.properties]
 
+#  datasource:
+#    url: jdbc:mysql://localhost:3306/cafe_study?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+#    username: ${DB_USERNAME}
+#    password: ${DB_PASSWORD}
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#
+#  sql:
+#    init:
+#      mode: always
+#
+#  jpa:
+#    hibernate:
+#      ddl-auto: update
+#    properties:
+#      hibernate:
+#        dialect: org.hibernate.dialect.MySQLDialect
+#        format_sql: true
+#        show_sql: true
+#    defer-datasource-initialization: true
+
   datasource:
-    url: jdbc:mysql://localhost:3306/cafe_study?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    url: jdbc:postgresql://localhost:5432/cafe_study
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: org.postgresql.Driver
 
   sql:
     init:
@@ -18,12 +38,17 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
         show_sql: true
+
     defer-datasource-initialization: true
+
+  jackson:
+    time-zone: Asia/Seoul
 
   security:
     oauth2:

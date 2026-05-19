@@ -101,7 +101,7 @@ class CafeRepositoryImpl(
 
     // 카페 이름 포함 여부 확인 (null이면 전체 조회)
     private fun nameContains(name: String?): BooleanExpression? =
-        if (!name.isNullOrEmpty()) cafe.name.contains(name) else null
+        if (!name.isNullOrEmpty()) cafe.name.containsIgnoreCase(name) else null
 }
 
 

@@ -90,6 +90,8 @@ dependencies {
     // Runtime
     runtimeOnly("com.h2database:h2")
     runtimeOnly("com.mysql:mysql-connector-j")
+    runtimeOnly("org.postgresql:postgresql")
+
 
     // Test
     testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")

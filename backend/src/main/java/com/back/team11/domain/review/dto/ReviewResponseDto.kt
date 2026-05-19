@@ -19,7 +19,7 @@ data class ReviewResponseDto(
                 review.member.id,
                 review.member.nickname,
                 review.content,
-                review.createdAt
+                review.createdAt!!
             )
     }
 }
