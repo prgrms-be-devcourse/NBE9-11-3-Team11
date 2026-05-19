@@ -10,10 +10,9 @@ import com.back.team11.global.util.CookieUtil
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 @Service
-@Transactional(readOnly = true)
+//@Transactional(readOnly = true)
 class AuthService(
     private val cookieUtil: CookieUtil,
     private val memberService: MemberService,
