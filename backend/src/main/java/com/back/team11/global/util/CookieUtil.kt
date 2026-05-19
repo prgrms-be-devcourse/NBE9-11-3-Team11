@@ -53,4 +53,10 @@ class CookieUtil {
         request.cookies
             ?.firstOrNull { it.name == "refreshToken" }
             ?.value
+
+    // AccessToken 쿠키 조회
+    fun getAccessTokenFromCookie(request: HttpServletRequest): String? =
+        request.cookies
+            ?.firstOrNull { it.name == "accessToken" }
+            ?.value
 }
