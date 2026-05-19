@@ -22,7 +22,12 @@ class TokenReissueService(
         val refreshTokenValue = cookieUtil.getRefreshTokenFromCookie(request)
             ?: throw CustomException(ErrorCode.INVALID_REFRESH_TOKEN)
 
-        val memberId = jwtTokenProvider.getMemberId(refreshTokenValue)
+        // MalformedJwtException 잡아서 INVALID_REFRESH_TOKEN 으로 처리
+        val memberId = try {
+            jwtTokenProvider.getMemberId(refreshTokenValue)
+        } catch (e: Exception) {
+            throw CustomException(ErrorCode.INVALID_REFRESH_TOKEN)
+        }
 
         // Redis에서 유효성 검증
         if (!tokenService.isValidRefreshToken(memberId, refreshTokenValue)) {
