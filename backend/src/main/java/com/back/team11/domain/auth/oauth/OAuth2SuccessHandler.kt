@@ -36,7 +36,7 @@ class OAuth2SuccessHandler(
             ?: throw IllegalStateException("OAuth2 사용자 role 정보를 찾을 수 없습니다.")
 
         jwtTokenProvider.generateRefreshToken(memberId).also { refreshToken ->
-            tokenService.saveOrUpdateRefreshToken(memberId, refreshToken)
+            tokenService.saveRefreshToken(memberId, refreshToken)
             cookieUtil.addRefreshTokenCookie(response, refreshToken)
         }
 
