@@ -94,4 +94,10 @@ class JwtTokenProvider(
      */
     fun getRole(token: String): String =
         parseClaims(token).get("role", String::class.java)
+
+    // AccessToken 남은 유효시간 반환 (밀리초)
+    fun getRemainingExpiry(token: String): Long {
+        val expiration = parseClaims(token).expiration
+        return expiration.time - System.currentTimeMillis()
+    }
 }
