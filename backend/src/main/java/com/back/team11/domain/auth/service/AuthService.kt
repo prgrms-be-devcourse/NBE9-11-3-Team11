@@ -1,8 +1,6 @@
 package com.back.team11.domain.auth.service
 
 import com.back.team11.domain.auth.dto.LoginRequestDto
-import com.back.team11.domain.auth.entity.RefreshToken
-import com.back.team11.domain.auth.repository.RefreshTokenRepository
 import com.back.team11.domain.member.entity.MemberRole
 import com.back.team11.domain.member.service.MemberService
 import com.back.team11.global.exception.CustomException
@@ -13,18 +11,16 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDateTime
 
 @Service
 @Transactional(readOnly = true)
 class AuthService(
     private val cookieUtil: CookieUtil,
-    private val refreshTokenRepository: RefreshTokenRepository,
     private val memberService: MemberService,
-    private val jwtTokenProvider: JwtTokenProvider
+    private val jwtTokenProvider: JwtTokenProvider,
+    private val tokenService: TokenService
 ) {
 
-    @Transactional
     fun adminLogin(loginRequestDto: LoginRequestDto, response: HttpServletResponse) {
         val member = memberService.findByEmail(loginRequestDto.email)
             ?: throw CustomException(ErrorCode.INVALID_LOGIN)
@@ -41,25 +37,30 @@ class AuthService(
         val memberId = member.id ?: throw IllegalStateException("Member ID가 없습니다.")
 
         val accessToken = jwtTokenProvider.generateAccessToken(memberId, member.role.name)
-        val refreshTokenValue = jwtTokenProvider.generateRefreshToken(memberId)
-        val expiresAt = LocalDateTime.now().plusSeconds(jwtTokenProvider.refreshTokenExpiration / 1000)
+        val refreshToken = jwtTokenProvider.generateRefreshToken(memberId)
 
-        // Optional.map().orElseGet() → 코틀린 let + elvis
-        val refreshToken = refreshTokenRepository.findByMemberId(memberId)
-            ?.also { it.rotate(refreshTokenValue, expiresAt) }
-            ?: RefreshToken(memberId = memberId, token = refreshTokenValue, expiresAt = expiresAt)
-
-        refreshTokenRepository.save(refreshToken)
+        tokenService.saveRefreshToken(memberId, refreshToken) // Redis에 저장
 
         cookieUtil.addAccessTokenCookie(response, accessToken)
-        cookieUtil.addRefreshTokenCookie(response, refreshTokenValue)
+        cookieUtil.addRefreshTokenCookie(response, refreshToken)
     }
 
-    @Transactional
     fun logout(request: HttpServletRequest, response: HttpServletResponse) {
-        cookieUtil.getRefreshTokenFromCookie(request)
-            ?.let { refreshTokenRepository.findByToken(it) }
-            ?.let { refreshTokenRepository.delete(it) }
+
+        val accessToken = cookieUtil.getAccessTokenFromCookie(request)
+        val refreshToken = cookieUtil.getRefreshTokenFromCookie(request)
+
+        // AccessToken 블랙리스트 등록
+        if (accessToken != null) {
+            val remaining = jwtTokenProvider.getRemainingExpiry(accessToken)
+            tokenService.addBlacklist(accessToken, remaining)
+        }
+
+        // RefreshToken 삭제
+        if (refreshToken != null) {
+            val memberId = jwtTokenProvider.getMemberId(refreshToken)
+            tokenService.deleteRefreshToken(memberId)
+        }
 
         cookieUtil.deleteAccessTokenCookie(response)
         cookieUtil.deleteRefreshTokenCookie(response)
