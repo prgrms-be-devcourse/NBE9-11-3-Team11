@@ -105,6 +105,15 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-validation-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    // Hibernate Spatial (PostGIS 지원)
+    implementation("org.hibernate.orm:hibernate-spatial")
+
+    // PostGIS JDBC 드라이버
+    implementation("net.postgis:postgis-jdbc:2023.1.0")
+
+    // JTS (Java Topology Suite) - Point, Polygon 등 공간 타입
+    implementation("org.locationtech.jts:jts-core:1.19.0")
 }
 
 // kapt 상세 설정: 자바 어노테이션 프로세서와 충돌 방지

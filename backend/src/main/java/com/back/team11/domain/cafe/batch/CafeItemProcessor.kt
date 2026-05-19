@@ -35,6 +35,10 @@ class CafeItemProcessor(
             address = address,                       // 결정된 주소 (도로명 우선)
             latitude = BigDecimal(dto.y),           // 위도 (문자열 y를 BigDecimal로 변환)
             longitude = BigDecimal(dto.x),          // 경도 (문자열 x를 BigDecimal로 변환)
+            location = Cafe.createPoint(
+                latitude = BigDecimal(dto.y),
+                longitude = BigDecimal(dto.x)
+            ),
             phone = dto.phone,                       // 전화번호
             franchise = franchise,                   // 프랜차이즈 정보
             // 프랜차이즈가 NONE이면 개인카페(INDIVIDUAL), 아니면 프랜차이즈(FRANCHISE)

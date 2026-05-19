@@ -5,6 +5,7 @@ import com.back.team11.domain.cafe.entity.*
 import com.back.team11.domain.cafe.entity.QCafe.cafe
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.jpa.impl.JPAQueryFactory
+import jakarta.persistence.EntityManager
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.support.PageableExecutionUtils
@@ -13,23 +14,87 @@ import org.springframework.stereotype.Repository
 @Repository
 class CafeRepositoryImpl(
     private val queryFactory: JPAQueryFactory,
+    private val entityManager: EntityManager,  // Native Query용 추가
 ) : CafeRepositoryCustom {
 
-    override fun searchCafes(condition: CafeSearchCondition): List<Cafe> =
+    override fun searchCafes(condition: CafeSearchCondition): List<Cafe> {
+        // 좌표 범위가 없으면 기존 QueryDSL 방식으로 fallback
+        if (condition.swLat == null || condition.neLat == null ||
+            condition.swLng == null || condition.neLng == null) {
+            return searchCafesQueryDsl(condition)
+        }
+        return searchCafesPostGis(condition)
+    }
+
+    // PostGIS ST_Within + MBR(Minimum Bounding Rectangle) 방식
+    private fun searchCafesPostGis(condition: CafeSearchCondition): List<Cafe> {
+        val sql = buildString {
+            append("""
+                SELECT c.* FROM cafe c
+                WHERE c.status = 'APPROVED'
+                AND ST_Within(
+                    c.location,
+                    ST_MakeEnvelope(:swLng, :swLat, :neLng, :neLat, 4326)
+                )
+            """)
+            condition.type?.let { append(" AND c.type = :type") }
+            condition.hasToilet?.let { append(" AND c.has_toilet = :hasToilet") }
+            condition.hasOutlet?.let { append(" AND c.has_outlet = :hasOutlet") }
+            condition.hasWifi?.let { append(" AND c.has_wifi = :hasWifi") }
+            condition.hasSeparateSpace?.let { append(" AND c.has_separate_space = :hasSeparateSpace") }
+            if (!condition.franchises.isNullOrEmpty()) {
+                append(" AND c.franchise IN (:franchises)")
+            }
+            if (!condition.floorCounts.isNullOrEmpty()) {
+                append(" AND c.floor_count IN (:floorCounts)")
+            }
+            if (!condition.congestionLevels.isNullOrEmpty()) {
+                append(" AND c.congestion_level IN (:congestionLevels)")
+            }
+        }
+
+        val query = entityManager.createNativeQuery(sql, Cafe::class.java)
+
+        // 좌표 바인딩
+        query.setParameter("swLng", condition.swLng)
+        query.setParameter("swLat", condition.swLat)
+        query.setParameter("neLng", condition.neLng)
+        query.setParameter("neLat", condition.neLat)
+
+        // 옵셔널 파라미터 바인딩
+        condition.type?.let { query.setParameter("type", it.name) }
+        condition.hasToilet?.let { query.setParameter("hasToilet", it) }
+        condition.hasOutlet?.let { query.setParameter("hasOutlet", it) }
+        condition.hasWifi?.let { query.setParameter("hasWifi", it) }
+        condition.hasSeparateSpace?.let { query.setParameter("hasSeparateSpace", it) }
+        if (!condition.franchises.isNullOrEmpty()) {
+            query.setParameter("franchises", condition.franchises.map { it.name })
+        }
+        if (!condition.floorCounts.isNullOrEmpty()) {
+            query.setParameter("floorCounts", condition.floorCounts.map { it.name })
+        }
+        if (!condition.congestionLevels.isNullOrEmpty()) {
+            query.setParameter("congestionLevels", condition.congestionLevels.map { it.name })
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        return query.resultList as List<Cafe>
+    }
+
+    // 좌표 없을 때 fallback (기존 로직)
+    private fun searchCafesQueryDsl(condition: CafeSearchCondition): List<Cafe> =
         queryFactory
             .selectFrom(cafe)
             .where(
-                isApproved(),                                           // AND status = 'APPROVED'
-                latBetween(condition.swLat, condition.neLat),          // AND latitude BETWEEN swLat AND neLat
-                lngBetween(condition.swLng, condition.neLng),          // AND longitude BETWEEN swLng AND neLng
-                cafeTypeEq(condition.type),                            // AND type = ?
-                franchiseIn(condition.franchises),                     // AND franchise IN (?)
-                hasToiletEq(condition.hasToilet),                      // AND has_toilet = ?
-                hasOutletEq(condition.hasOutlet),                      // AND has_outlet = ?
-                hasWifiEq(condition.hasWifi),                          // AND has_wifi = ?
-                floorCountIn(condition.floorCounts),                   // AND floor_count IN (?)
-                hasSeparateSpaceEq(condition.hasSeparateSpace),        // AND has_separate_space = ?
-                congestionIn(condition.congestionLevels),              // AND congestion_level IN (?)
+                isApproved(),
+                cafeTypeEq(condition.type),
+                franchiseIn(condition.franchises),
+                hasToiletEq(condition.hasToilet),
+                hasOutletEq(condition.hasOutlet),
+                hasWifiEq(condition.hasWifi),
+                floorCountIn(condition.floorCounts),
+                hasSeparateSpaceEq(condition.hasSeparateSpace),
+                congestionIn(condition.congestionLevels),
             )
             .fetch()
 

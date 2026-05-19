@@ -1,6 +1,7 @@
 package com.back.team11.domain.cafe.controller
 
 import com.back.team11.domain.cafe.entity.*
+import com.back.team11.domain.cafe.entity.Cafe.Companion.createPoint
 import com.back.team11.domain.cafe.repository.CafeRepository
 import com.back.team11.domain.member.entity.Member
 import com.back.team11.domain.member.entity.MemberRole
@@ -313,6 +314,10 @@ class AdminCafeControllerTest {
                 hasSeparateSpace = false,
                 congestionLevel = CongestionLevel.LOW,
                 status = CafeStatus.PENDING,
+                location = Cafe.createPoint(
+                    latitude = BigDecimal.valueOf(37.1),
+                    longitude = BigDecimal.valueOf(127.1)
+                ),
             )
         )
 
@@ -347,6 +352,10 @@ class AdminCafeControllerTest {
                 hasSeparateSpace = false,
                 congestionLevel = CongestionLevel.LOW,
                 status = CafeStatus.PENDING,
+                location = Cafe.createPoint(
+                    latitude = BigDecimal.valueOf(37.1),
+                    longitude = BigDecimal.valueOf(127.1)
+                ),
             )
         )
 

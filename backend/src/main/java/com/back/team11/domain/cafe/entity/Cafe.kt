@@ -7,6 +7,10 @@ import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.math.BigDecimal
 import java.time.LocalDateTime
+import org.locationtech.jts.geom.Point
+import org.locationtech.jts.geom.GeometryFactory
+import org.locationtech.jts.geom.PrecisionModel
+import org.locationtech.jts.geom.Coordinate
 
 @Entity
 @EntityListeners(AuditingEntityListener::class) // createdAt, updatedAt 자동 관리
@@ -26,9 +30,13 @@ class Cafe(
     @Column(nullable = false)
     var address: String,
 
+    // PostGIS Point 타입 (경도, 위도 순서 주의 - WGS84 기준)
+    @Column(name = "location", columnDefinition = "GEOMETRY(Point, 4326)", nullable = false)
+    var location: Point,
+
+    // 하위 호환용 — 마이그레이션 완료 후 제거 가능
     @Column(nullable = false, precision = 10, scale = 7)
     var latitude: BigDecimal,
-
     @Column(nullable = false, precision = 11, scale = 7)
     var longitude: BigDecimal,
 
@@ -85,6 +93,15 @@ class Cafe(
         // 정적 팩토리 메서드 - 관리자 직접 등록
         // member 없이 생성, status는 APPROVED 고정
         // ─────────────────────────────────────────────
+
+        private val geometryFactory = GeometryFactory(PrecisionModel(), 4326)
+
+        fun createPoint(latitude: BigDecimal, longitude: BigDecimal): Point {
+            // ST_MakePoint(longitude, latitude) 순서 주의!
+            val coordinate = Coordinate(longitude.toDouble(), latitude.toDouble())
+            return geometryFactory.createPoint(coordinate)
+        }
+
         fun createByAdmin(
             name: String,
             address: String,
@@ -106,6 +123,7 @@ class Cafe(
             address = address,
             latitude = latitude,
             longitude = longitude,
+            location = createPoint(latitude, longitude),
             phone = phone,
             description = description,
             type = type,
@@ -147,6 +165,7 @@ class Cafe(
             address = address,
             latitude = latitude,
             longitude = longitude,
+            location = createPoint(latitude, longitude),
             phone = phone,
             description = description,
             type = type,
@@ -185,8 +204,15 @@ class Cafe(
     ) {
         name?.let { this.name = it }
         address?.let { this.address = it }
+        // 좌표 변경 시 location도 동기화
+        val newLat = latitude ?: this.latitude
+        val newLng = longitude ?: this.longitude
+        if (latitude != null || longitude != null) {
+            this.location = createPoint(newLat, newLng)
+        }
         latitude?.let { this.latitude = it }
         longitude?.let { this.longitude = it }
+
         phone?.let { this.phone = it }
         description?.let { this.description = it }
         type?.let { this.type = it }
