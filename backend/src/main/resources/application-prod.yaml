@@ -8,3 +8,10 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            #일단은 시간이 없어서 하드코딩으로함
+            redirect-uri: "http://54.180.24.1/api/V1/auth/oauth/kakao/callback"
