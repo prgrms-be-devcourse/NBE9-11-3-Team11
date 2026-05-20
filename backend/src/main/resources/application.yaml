@@ -74,6 +74,9 @@ kakao:
 server:
   port: 8080
 
+oauth2:
+  redirect-url: "http://localhost:3000"
+
 springdoc:
   default-produces-media-type: application/json; charset=UTF-8
 

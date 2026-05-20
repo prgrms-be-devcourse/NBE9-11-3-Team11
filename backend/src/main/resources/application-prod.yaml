@@ -15,3 +15,6 @@ spring:
           kakao:
             #일단은 시간이 없어서 하드코딩으로함
             redirect-uri: "http://54.180.24.1/api/V1/auth/oauth/kakao/callback"
+
+oauth2:
+  redirect-url: "http://54.180.24.1"

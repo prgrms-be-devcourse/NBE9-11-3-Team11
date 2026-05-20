@@ -36,10 +36,12 @@ jobs:
             --build-arg NEXT_PUBLIC_KAKAO_MAP_KEY=${{ secrets.NEXT_PUBLIC_KAKAO_MAP_KEY }} \
             --build-arg NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }} \
             --build-arg NEXT_PUBLIC_API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_URL }} \
+            --build-arg KAKAO_REST_API_KEY=${{ secrets.KAKAO_REST_API_KEY }} \
             -t ${{ secrets.DOCKER_USERNAME }}/kagong-frontend:latest ./frontend
           docker push ${{ secrets.DOCKER_USERNAME }}/kagong-frontend:latest
         # frontend/Dockerfile 읽어서 이미지 빌드
         # NEXT_PUBLIC_ 변수는 빌드 타임에 번들에 포함되므로 --build-arg로 주입
+        # KAKAO_REST_API_KEY는 서버사이드 검색 API 호출용 (route.ts)
         # Docker Hub에 푸시
 
       - name: docker-compose.prod.yml, nginx.conf EC2 전송
@@ -63,8 +65,6 @@ jobs:
           # 새 이미지 기반으로 컨테이너 강제 교체 및 실행
           # --force-recreate: 이미지 태그가 같아도 컨테이너 무조건 재생성
           # 안 쓰는 옛날 이미지 삭제로 EC2 디스크 용량 관리
-          # 현재 docker-compose 1.29.2(구버전) 사용 중 → ContainerConfig KeyError 발생
-          # docker-compose → docker compose (V2) 로 변경 필요
           script: |
             cd /home/ubuntu/app
             docker compose -f docker-compose.prod.yml pull

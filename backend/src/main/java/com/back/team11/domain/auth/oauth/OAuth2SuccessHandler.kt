@@ -5,19 +5,19 @@ import com.back.team11.global.security.JwtTokenProvider
 import com.back.team11.global.util.CookieUtil
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.Authentication
 import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
 import org.springframework.stereotype.Component
 import java.io.IOException
 
-private const val REDIRECT_URL = "http://localhost:3000"
-
 @Component
 class OAuth2SuccessHandler(
     private val jwtTokenProvider: JwtTokenProvider,
     private val tokenService: TokenService,
-    private val cookieUtil: CookieUtil
+    private val cookieUtil: CookieUtil,
+    @Value("\${oauth2.redirect-url}") private val redirectUrl: String
 ) : SimpleUrlAuthenticationSuccessHandler() {
 
     @Throws(IOException::class)
@@ -42,7 +42,7 @@ class OAuth2SuccessHandler(
 
         cookieUtil.addAccessTokenCookie(response, jwtTokenProvider.generateAccessToken(memberId, role))
 
-        redirectStrategy.sendRedirect(request, response, REDIRECT_URL)
+        redirectStrategy.sendRedirect(request, response, redirectUrl)
     }
 
     private fun extractMemberId(oAuth2User: OAuth2User): Long {
@@ -51,7 +51,7 @@ class OAuth2SuccessHandler(
 
         return when (memberIdValue) {
             is Long -> memberIdValue
-            is Number -> memberIdValue.toLong()  // Int 포함 — Int는 Number 하위타입
+            is Number -> memberIdValue.toLong()
             is String -> memberIdValue.toLongOrNull()
                 ?: throw IllegalStateException("memberId를 Long 타입으로 변환할 수 없습니다.")
             else -> throw IllegalStateException("지원하지 않는 memberId 타입입니다: ${memberIdValue::class.simpleName}")
