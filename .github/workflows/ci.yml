@@ -93,6 +93,14 @@ jobs:
           # 빌드/테스트 시 필요한 환경변수 주입
           # .env 파일은 깃허브에 안 올라가니까 GitHub Secrets에서 읽어옴
 
+      # 결과 확인 용 임시
+      - name: 테스트 결과 업로드
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: backend/build/reports/tests/test/
+
   frontend:
     runs-on: ubuntu-latest
 
