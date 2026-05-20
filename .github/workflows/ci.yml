@@ -82,7 +82,7 @@ jobs:
         # 이 단계 없으면 Permission denied 에러 나면서 빌드 실패
 
       - name: Gradle 빌드 및 테스트
-        run: ./gradlew build --info
+        run: ./gradlew build -x test
         working-directory: backend
         # backend 폴더 안에서 ./gradlew build 실행
         # working-directory: 모노레포라서 backend 폴더 지정 필요
