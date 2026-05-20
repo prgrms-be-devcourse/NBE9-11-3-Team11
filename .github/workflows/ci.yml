@@ -32,13 +32,14 @@ jobs:
 
       redis:
         image: redis:7
-        # CI 테스트 환경에서 Redis 연결 필요
-        # 없으면 Redis 관련 테스트에서 NullPointerException 발생
-        # Redis 컨테이너의 6379 포트를 GitHub Actions 러너의 호스트 6379포트로 매핑
-        # 이게 있어야 스프링이 localhost:6379로 Redis에 접근 가능
+        options: >-
+          --requirepass root
+          --health-cmd "redis-cli -a root ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
         ports:
           - 6379:6379
-        options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=5
 
     steps:
       - name: 코드 체크아웃
@@ -78,7 +79,7 @@ jobs:
         # 이 단계 없으면 Permission denied 에러 나면서 빌드 실패
 
       - name: Gradle 빌드 및 테스트
-        run: ./gradlew build
+        run: ./gradlew build --info
         working-directory: backend
         # backend 폴더 안에서 ./gradlew build 실행
         # working-directory: 모노레포라서 backend 폴더 지정 필요
@@ -94,6 +95,7 @@ jobs:
           # CI에서 Redis 서비스 컨테이너가 localhost로 뜸
           # application.yml에서 ${REDIS_HOST:localhost} 기본값 있어서 없어도 되긴 함
           REDIS_PORT: 6379
+          REDIS_PASSWORD: root
 
           # 빌드/테스트 시 필요한 환경변수 주입
           # .env 파일은 깃허브에 안 올라가니까 GitHub Secrets에서 읽어옴
