@@ -48,7 +48,7 @@ spring:
             user-name-attribute: id
   batch:
     job:
-      enabled: false # 서버 시작시 자동실행
+      enabled: true # 서버 시작시 자동실행
 
 
   # 환경변수 REDIS_HOST가 있으면 그 값 사용(EC2 .env), 없으면 localhost 사용
@@ -73,6 +73,9 @@ kakao:
 
 server:
   port: 8080
+
+oauth2:
+  redirect-url: "http://localhost:3000"
 
 springdoc:
   default-produces-media-type: application/json; charset=UTF-8

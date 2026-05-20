@@ -4,7 +4,7 @@ import { useState } from "react";
 import { X } from "lucide-react";
 
 export interface FilterState {
-    type: string[];
+    type: string;          
     franchise: string[];
     hasWifi: boolean | null;
     hasOutlet: boolean | null;
@@ -21,7 +21,7 @@ interface FilterModalProps {
 }
 
 const initialFilters: FilterState = {
-    type: [],
+    type: "",              
     franchise: [],
     hasWifi: null,
     hasOutlet: null,
@@ -34,17 +34,21 @@ const initialFilters: FilterState = {
 export default function FilterModal({ onClose, onApply, currentFilters }: FilterModalProps) {
     const [filters, setFilters] = useState<FilterState>(currentFilters);
 
+    // 단일 선택 토글 (같은 거 누르면 해제, 다른 거 누르면 교체)
     const toggleType = (value: string) => {
         setFilters((prev) => {
-            const isSelected = prev.type.includes(value);
-            if (isSelected) {
+            if (prev.type === value) {
                 return {
                     ...prev,
-                    type: prev.type.filter((t) => t !== value),
-                    franchise: value === "FRANCHISE" ? [] : prev.franchise,
+                    type: "",
+                    franchise: [],
                 };
             }
-            return { ...prev, type: [...prev.type, value] };
+            return {
+                ...prev,
+                type: value,
+                franchise: value !== "FRANCHISE" ? [] : prev.franchise,
+            };
         });
     };
 
@@ -57,9 +61,7 @@ export default function FilterModal({ onClose, onApply, currentFilters }: Filter
             return {
                 ...prev,
                 franchise: newFranchise,
-                type: newFranchise.length === 0
-                    ? prev.type.filter((t) => t !== "FRANCHISE")
-                    : prev.type,
+                type: newFranchise.length === 0 ? "" : "FRANCHISE",  // ✅ 배열 → 문자열
             };
         });
     };
@@ -112,19 +114,19 @@ export default function FilterModal({ onClose, onApply, currentFilters }: Filter
                     <div className="flex flex-wrap gap-2">
                         <button
                             onClick={() => toggleType("FRANCHISE")}
-                            className={chipClass(filters.type.includes("FRANCHISE"))}
+                            className={chipClass(filters.type === "FRANCHISE")}  
                         >
                             프랜차이즈
                         </button>
                         <button
                             onClick={() => toggleType("INDIVIDUAL")}
-                            className={chipClass(filters.type.includes("INDIVIDUAL"))}
+                            className={chipClass(filters.type === "INDIVIDUAL")}  
                         >
                             개인카페
                         </button>
                     </div>
 
-                    {filters.type.includes("FRANCHISE") && (
+                    {filters.type === "FRANCHISE" && ( 
                         <div className="flex flex-wrap gap-2 mt-3 pl-1">
                             {[
                                 { label: "스타벅스", value: "STARBUCKS" },

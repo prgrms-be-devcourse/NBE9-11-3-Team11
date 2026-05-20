@@ -93,7 +93,11 @@ dependencies {
 
     // Runtime
     runtimeOnly("com.h2database:h2")
+    // MySQL 드라이버 (로컬용 유지)
     runtimeOnly("com.mysql:mysql-connector-j")
+
+    // PostgreSQL 드라이버 추가
+    runtimeOnly("org.postgresql:postgresql")
 
     // Test
     testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")

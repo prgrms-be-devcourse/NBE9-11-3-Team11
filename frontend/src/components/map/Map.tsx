@@ -14,6 +14,7 @@ interface KakaoMapProps {
     onCafeSelect: (cafeId: number) => void;
     center: { lat: number; lng: number } | null;
     filters: {
+        type: string;
         franchise: string[];
         hasWifi: boolean | null;
         hasOutlet: boolean | null;
@@ -82,6 +83,7 @@ export default function KakaoMap({ onCafeSelect, center, filters, onBoundsChange
                 floorCounts: filters.floorCount.length > 0 ? filters.floorCount : undefined,
                 congestionLevels: filters.congestionLevel.length > 0 ? filters.congestionLevel : undefined,
                 franchises: filters.franchise.length > 0 ? filters.franchise : undefined,
+                type: filters.type || undefined,   //  단일값으로 전달
             });
 
             if (!cafes || !Array.isArray(cafes)) return;
