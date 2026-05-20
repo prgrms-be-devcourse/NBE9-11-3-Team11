@@ -58,8 +58,9 @@ spring:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD}
-
+      password: ${REDIS_PASSWORD:}
+      # 콜론 뒤 빈값 → 기본값이 빈 문자열
+      # CI에서 빈 값 주입 시 AUTH 명령어 안 보냄
 
 
 jwt:
