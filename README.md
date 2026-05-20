@@ -1,5 +1,5 @@
-# NBE9-11-2-Team11
-백엔드 11기 2차 11팀 프로젝트 - 열일하조
+# NBE9-11-3-Team11
+백엔드 11기 3차 11팀 프로젝트 - 열일하조
 
 # ☕ 카공데이 - 지도 기반 카페 탐색 서비스
 
@@ -55,11 +55,12 @@
 
 | 이름  | 담당                                                      |
 |-----|---------------------------------------------------------|
-| 최동현 | 팀장, 백엔드 - 관리자 카페 정보 CRUD 및 유저 제보 <br/>프론트 - 필터링 모달      |
-| 서준우 | 백엔드 - 카페 리뷰 CRUD <br/>프론트 - 로그인 페이지, 리뷰 수정              |
-| 안수빈 | 백엔드 - JWT 기반 사용자 인증/인가 및 토큰 관리 구현 <br/>프론트 - 관리자 페이지 구현 |
-| 이형진 | 백엔드 - 사용자 OAuth, 관리자 로그인 구현 <br/>프론트 - 관리자 로그아웃 구현      |
-| 최민규 | 백엔드 - 카페 목록/단건 검색, 찜 기능 구현 <br/>프론트 - 맵 연동 및 기본 화면 틀 구현 |
+|      | 공동 작업 - 백엔드 Kotlin 마이그레이션    |
+| 최동현 | 팀장, 백엔드 - 관리자 카페 정보 CRUD 및 유저 제보, 모니터링 및 부하테스트 담당 <br/>프론트 - 필터링 모달      |
+| 서준우 | 백엔드 - 카페 리뷰 CRUD 테스트 데이더 구현 및 Postgre 이전 담당 <br/>프론트 - 로그인 페이지, 리뷰 수정              |
+| 안수빈 | 백엔드 - JWT 기반 사용자 인증/인가 및 토큰 관리 구현, aws 배포 <br/>프론트 - 관리자 페이지 구현 |
+| 이형진 | 백엔드 - 사용자 OAuth, 관리자 로그인 구현, redis 도입 <br/>프론트 - 관리자 로그아웃 구현      |
+| 최민규 | 백엔드 - 카페 목록/단건 검색, 찜 기능 구현, CI/CD, docker compose 작성 <br/>프론트 - 맵 연동 및 기본 화면 틀 구현 |
 
 
 
@@ -94,151 +95,150 @@ backend/
 ├── src/
 │   ├── main/
 │   │   ├── java/com/back/team11/
+│   │   │   ├── BackendApplication.kt
+│   │   │   ├── DataInitializer.kt
 │   │   │   ├── domain/
 │   │   │   │   ├── member/
 │   │   │   │   │   ├── entity/
-│   │   │   │   │   │   ├── Member.java                    # Entity
-│   │   │   │   │   │   ├── MemberRole.java                # Enum - ADMIN / USER
-│   │   │   │   │   │   └── Provider.java                  # Enum - LOCAL / KAKAO
+│   │   │   │   │   │   ├── Member.kt                      # Entity
+│   │   │   │   │   │   ├── MemberRole.kt                  # Enum - ADMIN / USER
+│   │   │   │   │   │   └── Provider.kt                    # Enum - LOCAL / KAKAO
 │   │   │   │   │   ├── repository/
-│   │   │   │   │   │   └── MemberRepository.java          # Repo
+│   │   │   │   │   │   └── MemberRepository.kt            # Repo
 │   │   │   │   │   ├── service/
-│   │   │   │   │   │   └── MemberService.java             # Service
+│   │   │   │   │   │   └── MemberService.kt               # Service
 │   │   │   │   │   ├── controller/
-│   │   │   │   │   │   └── MemberController.java          # Controller
+│   │   │   │   │   │   └── MemberController.kt            # Controller
 │   │   │   │   │   └── dto/
-│   │   │   │   │       ├── MemberRequestDto.java          # DTO
-│   │   │   │   │       └── MemberResponseDto.java         # DTO
+│   │   │   │   │       ├── MemberRequestDto.kt            # DTO
+│   │   │   │   │       └── MemberResponseDto.kt           # DTO
 │   │   │   │   │
 │   │   │   │   ├── cafe/
 │   │   │   │   │   ├── batch/
 │   │   │   │   │   │   ├── dto/
-│   │   │   │   │   │   │   ├── KakaoPlaceDto
-│   │   │   │   │   │   │   ├── KakaoSearchResponse
-│   │   │   │   │   │   ├── CafeApiItemReader.java         # Batch
-│   │   │   │   │   │   ├── CafeCollectJobConfig.java      # Batch
-│   │   │   │   │   │   └── CafeItemProcessor.java         # Batch
+│   │   │   │   │   │   │   ├── KakaoPlaceDto.kt
+│   │   │   │   │   │   │   └── KakaoSearchResponse.kt
+│   │   │   │   │   │   ├── CafeApiClient.kt               # Batch
+│   │   │   │   │   │   ├── CafeCollectJobConfig.kt        # Batch
+│   │   │   │   │   │   └── CafeItemProcessor.kt           # Batch
 │   │   │   │   │   ├── entity/
-│   │   │   │   │   │   ├── Cafe.java                      # Entity
-│   │   │   │   │   │   ├── CafeType.java                  # Enum - FRANCHISE / INDIVIDUAL
-│   │   │   │   │   │   ├── Franchise.java                 # Enum - STARBUCKS / MEGA_COFFEE / NONE
-│   │   │   │   │   │   ├── CafeStatus.java                # Enum - PENDING / APPROVED / REJECTED
-│   │   │   │   │   │   ├── FloorCount.java                # Enum - ONE / TWO / THREE_OR_MORE
-│   │   │   │   │   │   └── CongestionLevel.java           # Enum - LOW / MEDIUM / HIGH
+│   │   │   │   │   │   ├── Cafe.kt                        # Entity
+│   │   │   │   │   │   ├── CafeType.kt                    # Enum - FRANCHISE / INDIVIDUAL
+│   │   │   │   │   │   ├── Franchise.kt                   # Enum - STARBUCKS / MEGA_COFFEE / NONE
+│   │   │   │   │   │   ├── CafeStatus.kt                  # Enum - PENDING / APPROVED / REJECTED
+│   │   │   │   │   │   ├── FloorCount.kt                  # Enum - ONE / TWO / THREE_OR_MORE
+│   │   │   │   │   │   └── CongestionLevel.kt             # Enum - LOW / MEDIUM / HIGH
 │   │   │   │   │   ├── repository/
-│   │   │   │   │   │   ├── CafeRepository.java            # Repo
-│   │   │   │   │   │   ├── CafeRepositoryCustom.java      # Repo
-│   │   │   │   │   │   ├── CafeRepositoryImpl.java        # Repo
-│   │   │   │   │   │   └── CafeSearchCondition.java       # Repo
+│   │   │   │   │   │   ├── CafeRepository.kt              # Repo
+│   │   │   │   │   │   ├── CafeRepositoryCustom.kt        # Repo
+│   │   │   │   │   │   ├── CafeRepositoryImpl.kt          # Repo
+│   │   │   │   │   │   └── CafeSearchCondition.kt         # Repo
 │   │   │   │   │   ├── service/
-│   │   │   │   │   │   ├── CafeService.java               # Service
-│   │   │   │   │   │   └── AdminCafeService.java          # Service
+│   │   │   │   │   │   ├── CafeService.kt                 # Service
+│   │   │   │   │   │   └── AdminCafeService.kt            # Service
 │   │   │   │   │   ├── controller/
-│   │   │   │   │   │   ├── AdminCafeController.java       # Controller
-│   │   │   │   │   │   ├── CafeController.java            # Controller
-│   │   │   │   │   │   └── CafeSearchController.java      # Controller
+│   │   │   │   │   │   ├── AdminCafeController.kt         # Controller
+│   │   │   │   │   │   ├── CafeController.kt              # Controller
+│   │   │   │   │   │   └── CafeSearchController.kt        # Controller
 │   │   │   │   │   └── dto/
-│   │   │   │   │       ├── AdminCafeResponse.java         # DTO
-│   │   │   │   │       ├── AdminCafeSearchCondition.java  # DTO
-│   │   │   │   │       ├── CafeBaseInfo.java              # DTO
-│   │   │   │   │       ├── CafeDetailResponse.java        # DTO
-│   │   │   │   │       ├── CafeListResponse.java          # DTO
-│   │   │   │   │       ├── CafeRequest.java               # DTO
-│   │   │   │   │       ├── CafeResponse.java              # DTO
-│   │   │   │   │       ├── CafeUpdateRequest.java         # DTO
-│   │   │   │   │       └── PageResponse.java              # DTO - 검색 필터
+│   │   │   │   │       ├── AdminCafeResponse.kt           # DTO
+│   │   │   │   │       ├── AdminCafeSearchCondition.kt    # DTO
+│   │   │   │   │       ├── CafeBaseInfo.kt                # DTO
+│   │   │   │   │       ├── CafeDetailResponse.kt          # DTO
+│   │   │   │   │       ├── CafeListResponse.kt            # DTO
+│   │   │   │   │       ├── CafeRequest.kt                 # DTO
+│   │   │   │   │       ├── CafeResponse.kt                # DTO
+│   │   │   │   │       ├── CafeUpdateRequest.kt           # DTO
+│   │   │   │   │       └── PageResponse.kt                # DTO
 │   │   │   │   │
 │   │   │   │   ├── review/
 │   │   │   │   │   ├── entity/
-│   │   │   │   │   │   └── Review.java                    # Entity
+│   │   │   │   │   │   └── Review.kt                      # Entity
 │   │   │   │   │   ├── repository/
-│   │   │   │   │   │   └── ReviewRepository.java          # Repo
+│   │   │   │   │   │   └── ReviewRepository.kt            # Repo
 │   │   │   │   │   ├── service/
-│   │   │   │   │   │   └── ReviewService.java             # Service
+│   │   │   │   │   │   └── ReviewService.kt               # Service
 │   │   │   │   │   ├── controller/
-│   │   │   │   │   │   └── ReviewController.java          # Controller
+│   │   │   │   │   │   └── ReviewController.kt            # Controller
 │   │   │   │   │   └── dto/
-│   │   │   │   │       ├── ReviewRequestDto.java          # DTO
-│   │   │   │   │       └── ReviewResponseDto.java         # DTO
+│   │   │   │   │       ├── ReviewRequestDto.kt            # DTO
+│   │   │   │   │       └── ReviewResponseDto.kt           # DTO
 │   │   │   │   │
 │   │   │   │   └── wishlist/
 │   │   │   │       ├── entity/
-│   │   │   │       │   └── Wishlist.java                  # Entity
+│   │   │   │       │   └── Wishlist.kt                    # Entity
 │   │   │   │       ├── repository/
-│   │   │   │       │   └── WishlistRepository.java        # Repo
+│   │   │   │       │   └── WishlistRepository.kt          # Repo
 │   │   │   │       ├── service/
-│   │   │   │       │   └── WishlistService.java           # Service
+│   │   │   │       │   └── WishlistService.kt             # Service
 │   │   │   │       ├── controller/
-│   │   │   │       │   └── WishlistController.java        # Controller
+│   │   │   │       │   └── WishlistController.kt          # Controller
 │   │   │   │       └── dto/
-│   │   │   │           └── WishlistResponse.java          # DTO
+│   │   │   │           └── WishlistResponse.kt            # DTO
 │   │   │   │
 │   │   │   ├── auth/
-│   │   │   │   ├── entity/
-│   │   │   │   │   └── RefreshToken.java                  # Entity
-│   │   │   │   ├── repository/
-│   │   │   │   │   └── RefreshTokenRepository.java        # Repo
-│   │   │   │   ├── service/
-│   │   │   │   │   ├── AuthService.java    
-│   │   │   │   │   ├── TokenReissueService.java    
-│   │   │   │   │   └── TokenService.java                  # Service
-│   │   │   │   ├── controller/
-│   │   │   │   │   ├── AdminAuthController.java    
-│   │   │   │   │   ├── AuthController.java    
-│   │   │   │   │   └── TokenReissueController.java        # Controller
 │   │   │   │   ├── dto/
-│   │   │   │   │   ├── LoginRequestDto.java               # DTO - 관리자 로컬 로그인
-│   │   │   │   │   └── TokenResponseDto.java              # DTO - JWT 토큰
-│   │   │   │   └── oauth/
-│   │   │   │       ├── CustomOAuth2UserService.java       # Serivce
-│   │   │   │       ├── OAuth2SuccessHandler.java          
-│   │   │   │       └── OAuthAttributes.java               
-│   │   │   │
-│   │   │   ├── security/
-│   │   │   │   ├── SecurityConfig.java                    # Config
-│   │   │   │   ├── JwtTokenProvider.java                  # Security
-│   │   │   │   ├── JwtAuthenticationFilter.java           # Security
-│   │   │   │   ├── CustomUserDetails.java                 # Security
-│   │   │   │   └── CustomUserDetailsService.java          # Security
+│   │   │   │   │   ├── LoginRequestDto.kt                 # DTO - 관리자 로컬 로그인
+│   │   │   │   │   └── TokenResponseDto.kt                # DTO - JWT 토큰
+│   │   │   │   ├── oauth/
+│   │   │   │   │   ├── CustomOAuth2UserService.kt         # Service
+│   │   │   │   │   ├── OAuth2SuccessHandler.kt
+│   │   │   │   │   └── OAuthAttributes.kt
+│   │   │   │   ├── controller/
+│   │   │   │   │   ├── AdminAuthController.kt
+│   │   │   │   │   ├── AuthController.kt
+│   │   │   │   │   └── TokenReissueController.kt          # Controller
+│   │   │   │   └── service/
+│   │   │   │       ├── AuthService.kt
+│   │   │   │       ├── TokenReissueService.kt
+│   │   │   │       └── TokenService.kt                    # Service
 │   │   │   │
 │   │   │   └── global/
 │   │   │       ├── config/
-│   │   │       │   ├── QueryDslConfig.java                # Config
-│   │   │       │   └── SwaggerConfig.java                 # Config
+│   │   │       │   ├── QueryDslConfig.kt                  # Config
+│   │   │       │   ├── RedisConfig.kt                     # Config - Redis 설정
+│   │   │       │   ├── RestTemplateConfig.kt              # Config
+│   │   │       │   └── SwaggerConfig.kt                   # Config
 │   │   │       ├── dto/
-│   │   │       │   ├── PageResponse.java                  # dto
+│   │   │       │   └── PageResponse.kt                    # DTO
 │   │   │       ├── exception/
-│   │   │       │   ├── GlobalExceptionHandler.java
-│   │   │       │   ├── ErrorCode.java
-│   │   │       │   └── CustomException.java
-│   │   │       ├── rsData
-│   │   │       │   └── RsData.java                         # 공통 응답 래퍼
+│   │   │       │   ├── GlobalExceptionHandler.kt
+│   │   │       │   ├── ErrorCode.kt
+│   │   │       │   └── CustomException.kt
+│   │   │       ├── extension/
+│   │   │       │   └── RepositoryExtensions.kt
+│   │   │       ├── rsData/
+│   │   │       │   └── RsData.kt                          # 공통 응답 래퍼
+│   │   │       ├── security/
+│   │   │       │   ├── SecurityConfig.kt                  # Config
+│   │   │       │   ├── JwtTokenProvider.kt                # Security
+│   │   │       │   └── JwtAuthenticationFilter.kt         # Security
 │   │   │       └── util/
-│   │   │           ├── CookieUtil.java                    # RefreshToken 추가
-│   │   │           └── AutiUtil.java                      # Config 
+│   │   │           ├── AuthUtil.kt
+│   │   │           └── CookieUtil.kt
 │   │   │
 │   │   └── resources/
-│   │       ├── application.yaml                           # 공통
-│   │       └── data.sql                                   # 공통
+│   │       ├── application.yml                            # 공통
+│   │       └── application-prod.yml                      # 배포 환경
 │   │
 │   └── test/java/com/back/team11/
 │       ├── domain/
-│       │   ├── auth/
-│       │   │   ├── AdminAuthControllerTest.java
-│       │   │   ├── AuthControllerTest.java
-│       │   │   └── TokenReissueControllerTest.java
-│       │   ├── cafe/
-│       │   │   ├── AdminCafeControllerTest.java
-│       │   │   ├── CafeControllerTest.java
-│       │   │   └── CafeSearchControllerTest.java
-│       │   ├── review/
-│       │   │   └── ReviewControllerTest.java
-│       │   └── wishlist/
-│       │       └── WishlistControllerTest.java
-│       └── BackendApplicationTests.java
+│       │   ├── auth/controller/
+│       │   │   ├── AdminAuthControllerTest.kt
+│       │   │   ├── AuthControllerTest.kt
+│       │   │   └── TokenReissueControllerTest.kt
+│       │   ├── cafe/controller/
+│       │   │   ├── AdminCafeControllerTest.kt
+│       │   │   ├── CafeControllerTest.kt
+│       │   │   └── CafeSearchControllerTest.kt
+│       │   ├── review/controller/
+│       │   │   └── ReviewControllerTest.kt
+│       │   └── wishlist/controller/
+│       │       └── WishlistControllerTest.kt
+│       └── BackendApplicationTests.kt
 │
-├── build.gradle
-└── settings.gradle
+├── build.gradle.kts
+└── settings.gradle.kts
 ```
 
 ### 프론트엔드
@@ -345,94 +345,35 @@ frontend/
 
 🗄 ERD
 
-![img.png](img.png)
+![img.png](img.png)<br/>
+2차 프로젝트 ERD에서 변경된 사항:
+- `refresh_token` 테이블 제거 → Redis로 이전 (TTL 자동 만료 처리)
+
+기존 테이블 구조 (`member`, `cafe`, `review`, `wishlist`) 동일하게 유지
 
 ## 🚀 실행 방법
 
 ### Backend
 **1. 레포지토리 클론**
 ```bash
-git clone https://github.com/prgrms-be-devcourse/NBE9-11-2-Team11.git
-cd NBE9-11-2-Team11/backend
+git clone https://github.com/prgrms-be-devcourse/NBE9-11-3-Team11.git
+cd NBE9-11-3-Team11/backend
 ```
 
-**2. application.yaml 설정**
-```yaml
-spring:
-  application:
-    name: backend
-
-  config:
-    import: optional:file:..env[.properties]
-
-  datasource:
-    url: jdbc:mysql://localhost:3306/cafe_study?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
-
-  sql:
-    init:
-      mode: always
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
-        format_sql: true
-        show_sql: true
-    defer-datasource-initialization: true
-
-  security:
-    oauth2:
-      client:
-        registration:
-          kakao:
-            client-id: ${CLIENT_ID}
-            authorization-grant-type: authorization_code
-            redirect-uri: "http://localhost:8080/api/V1/auth/oauth/kakao/callback"
-            client-name: Kakao
-            scope:
-              - profile_nickname
-              - profile_image
-
-
-        provider:
-          kakao:
-            authorization-uri: https://kauth.kakao.com/oauth/authorize
-            token-uri: https://kauth.kakao.com/oauth/token
-            user-info-uri: https://kapi.kakao.com/v2/user/me
-            user-name-attribute: id
-  batch:
-    job:
-      enabled: true # 서버 시작시 자동실행
-
-jwt:
-  secret: ${JWT_SECRET}
-  access-token-expiration: 1800000
-  refresh-token-expiration: 604800000
-
-kakao:
-  rest-api-key: ${KAKAO_REST_API_KEY}
-
-server:
-  port: 8080
-
-springdoc:
-  default-produces-media-type: application/json; charset=UTF-8
-```
-**3. 환경변수 설정**
+**2. 환경변수 설정**
 ```bash
 CLIENT_ID={CLIENT_ID}
 DB_USERNAME={DB_USERNAME}
 DB_PASSWORD={DB_PASSWORD}
 JWT_SECRET={YOUR_SECRET_JWT_KEY}
 KAKAO_REST_API_KEY={KAKAO_REST_API_KEY}
+REDIS_PASSWORD={REDIS_PASSWORD}
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/cafe_study
+REDIS_HOST=localhost
+REDIS_PORT=6379
 ```
 
-**4. 서버 실행**
+**3. 서버 실행**
 ```bash
 ./gradlew bootRun
 ```
@@ -452,6 +393,7 @@ KAKAO_REST_API_KEY={KAKAO_REST_API_KEY}
 NEXT_PUBLIC_API_URL=http://localhost:8080
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
 ```
+
 **3. 개발 서버 실행**
 ```bash
 npm run dev
