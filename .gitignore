@@ -9,6 +9,7 @@ frontend/.next/
 
 # 공통
 .env
+.env.prod
 .DS_Store
 .idea/
 *.iml
