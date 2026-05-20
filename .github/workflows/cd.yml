@@ -63,8 +63,10 @@ jobs:
           # 새 이미지 기반으로 컨테이너 강제 교체 및 실행
           # --force-recreate: 이미지 태그가 같아도 컨테이너 무조건 재생성
           # 안 쓰는 옛날 이미지 삭제로 EC2 디스크 용량 관리
+          # 현재 docker-compose 1.29.2(구버전) 사용 중 → ContainerConfig KeyError 발생
+          # docker-compose → docker compose (V2) 로 변경 필요
           script: |
             cd /home/ubuntu/app
-            docker-compose -f docker-compose.prod.yml pull
-            docker-compose -f docker-compose.prod.yml up -d --force-recreate
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d --force-recreate
             docker image prune -f
