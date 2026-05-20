@@ -45,8 +45,13 @@ class TokenService(
     }
 
     // 블랙리스트 확인
-    fun isBlacklisted(accessToken: String): Boolean =
-        redisTemplate.hasKey("$BLACKLIST_PREFIX$accessToken") == true
+    fun isBlacklisted(accessToken: String): Boolean {
+        return try {
+            redisTemplate.hasKey("$BLACKLIST_PREFIX$accessToken") == true
+        } catch (e: Exception) {
+            false
+        }
+    }
 
 
 }

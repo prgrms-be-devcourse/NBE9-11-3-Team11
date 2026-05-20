@@ -60,6 +60,9 @@ class JwtAuthenticationFilter(
                 return
 
             } catch (e: Exception) {
+                println("========= JWT 필터 에러 진짜 원인 =========")
+                e.printStackTrace()
+                println("========================================")
                 sendErrorResponse(response, ErrorCode.INVALID_TOKEN)
                 return
             }
