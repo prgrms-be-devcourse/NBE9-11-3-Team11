@@ -1,0 +1,72 @@
+name: CD
+
+on:
+  push:
+    branches: [ main, dev ]
+    # main 또는 dev 브랜치에 머지됐을 때 자동 실행
+    # CI 통과 → PR 머지 → CD 자동 실행 흐름
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # GitHub에서 제공하는 우분투 서버에서 실행
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+        # GitHub 레포 코드를 서버에 내려받음
+        # 이게 없으면 빌드할 코드가 없음
+
+      - name: Docker 로그인
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+        # Docker Hub에 이미지 푸시하기 위해 로그인
+        # DOCKER_USERNAME, DOCKER_PASSWORD는 GitHub Secrets에서 읽어옴
+
+      - name: 백엔드 Docker 이미지 빌드 및 푸시
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/kagong-backend:latest ./backend
+          docker push ${{ secrets.DOCKER_USERNAME }}/kagong-backend:latest
+        # backend/Dockerfile 읽어서 이미지 빌드
+        # Dockerfile 안에서 gradle build 실행 → jar 생성 → 이미지 패키징
+        # Docker Hub에 푸시
+
+      - name: 프론트엔드 Docker 이미지 빌드 및 푸시
+        run: |
+          docker build \
+            --build-arg NEXT_PUBLIC_KAKAO_MAP_KEY=${{ secrets.NEXT_PUBLIC_KAKAO_MAP_KEY }} \
+            --build-arg NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }} \
+            --build-arg NEXT_PUBLIC_API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_URL }} \
+            -t ${{ secrets.DOCKER_USERNAME }}/kagong-frontend:latest ./frontend
+          docker push ${{ secrets.DOCKER_USERNAME }}/kagong-frontend:latest
+        # frontend/Dockerfile 읽어서 이미지 빌드
+        # NEXT_PUBLIC_ 변수는 빌드 타임에 번들에 포함되므로 --build-arg로 주입
+        # Docker Hub에 푸시
+
+      - name: docker-compose.prod.yml EC2 전송
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "docker-compose.prod.yml"
+          target: "/home/ubuntu/app"
+          strip_components: 0
+          # 루트에 있는 파일 그대로 /home/ubuntu/app/docker-compose.prod.yml로 전송
+          # nginx.conf 작성 완료 후 source에 추가 예정
+          # source: "docker-compose.prod.yml,nginx.conf"
+
+      - name: EC2 배포
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/app
+            docker-compose -f docker-compose.prod.yml pull
+            # Docker Hub에서 최신 이미지 받아옴
+            docker-compose -f docker-compose.prod.yml up -d --force-recreate
+            # 새 이미지 기반으로 컨테이너 강제 교체 및 실행
+            # --force-recreate: 이미지 태그가 같아도 컨테이너 무조건 재생성
+            docker image prune -f
+            # 안 쓰는 옛날 이미지 삭제로 EC2 디스크 용량 관리

@@ -8,10 +8,19 @@ WORKDIR /app
 # 소스코드 변경 시 의존성 다운로드를 다시 하지 않도록
 COPY package.json package-lock.json ./
 
-
 #npm ci  → package-lock.json 기반으로 정확한 버전 설치
 #npm install → package.json 기반으로 설치 (버전이 달라질 수 있음)
 RUN npm ci
+
+# NEXT_PUBLIC_ 변수는 빌드 타임에 번들에 포함되므로 ARG로 받아야 함
+# CD에서 docker build --build-arg로 주입
+# 런타임에 환경변수로 주입해도 적용 안 됨 (빌드 시점에 번들에 박히기 때문)
+ARG NEXT_PUBLIC_KAKAO_MAP_KEY
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_API_BASE_URL
+ENV NEXT_PUBLIC_KAKAO_MAP_KEY=$NEXT_PUBLIC_KAKAO_MAP_KEY
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
 
 # 현재 로컬 디렉토리의 모든 파일을 컨테이너 현재 디렉토리로 복사
 COPY . .
