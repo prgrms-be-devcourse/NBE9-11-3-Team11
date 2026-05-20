@@ -56,6 +56,11 @@ services:
     # CD에서 빌드 후 Docker Hub에 올린 이미지를 pull해서 실행
     image: ${DOCKER_USERNAME}/kagong-frontend:latest
 
+    #KAKAO_REST_API_KEY는 NEXT_PUBLIC_이 아니라서 빌드 타임이 아닌 런타임에 읽음
+    #Dockerfile에서 ARG/ENV로 빌드 타임에 주입하는 게 아니라 컨테이너 실행 시 환경변수로 주입
+    environment:
+      - KAKAO_REST_API_KEY=${KAKAO_REST_API_KEY}
+
     # 외부에 직접 노출 안 하고 Nginx가 내부 네트워크로 접근
     expose:
       - "3000"
