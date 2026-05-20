@@ -7,7 +7,7 @@ services:
     # TODO: DockerHub 계정명은 CI/CD 담당 팀원이 확정 후 수정
     image: kagongday/kagongday-backend:latest
 
-    # .env 파일에 작성된 환경변수 값을 컨테이너 내부에서 사용
+    # ..env 파일에 작성된 환경변수 값을 컨테이너 내부에서 사용
     # DB_URL, DB_USERNAME, DB_PASSWORD, JWT_SECRET 등
     env_file:
       - .env
@@ -17,7 +17,7 @@ services:
     environment:
       REDIS_HOST: redis
       REDIS_PORT: "6379"
-      # Redis 비밀번호 (.env 파일에서 읽어옴)
+      # Redis 비밀번호 (..env 파일에서 읽어옴)
       REDIS_PASSWORD: ${REDIS_PASSWORD}
 
     # 외부에 8080 포트를 직접 공개하지 않고
@@ -86,7 +86,7 @@ services:
     image: redis:7
 
     # Redis 접속 시 비밀번호를 요구하도록 설정
-    # REDIS_PASSWORD 값은 프로젝트 루트의 .env 파일에서 읽어옴
+    # REDIS_PASSWORD 값은 프로젝트 루트의 ..env 파일에서 읽어옴
     command: redis-server --requirepass ${REDIS_PASSWORD}
 
     # 외부에는 Redis 포트를 공개하지 않음

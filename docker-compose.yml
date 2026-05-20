@@ -2,7 +2,7 @@ services:
   mysql:
     image: mysql:8          # Docker Hub에서 MySQL 8 이미지 가져옴
     env_file:
-      - ./backend/.env # backend의 env 파일 설정
+      - .env # backend의 .env 파일 설정
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}     # root 계정 비밀번호
       MYSQL_DATABASE: cafe_study     # 자동으로 DB 생성
