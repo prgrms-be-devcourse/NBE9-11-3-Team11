@@ -94,8 +94,6 @@ jobs:
           # CI에서 Redis 서비스 컨테이너가 localhost로 뜸
           # application.yml에서 ${REDIS_HOST:localhost} 기본값 있어서 없어도 되긴 함
           REDIS_PORT: 6379
-          REDIS_PASSWORD: ""
-          # GitHub Secrets에 REDIS_PASSWORD 추가 필요
 
           # 빌드/테스트 시 필요한 환경변수 주입
           # .env 파일은 깃허브에 안 올라가니까 GitHub Secrets에서 읽어옴
