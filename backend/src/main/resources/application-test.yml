@@ -1,0 +1,7 @@
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+      # CI에서 Redis 비밀번호 없이 뜨므로 빈 값
