@@ -1,0 +1,58 @@
+services:
+  mysql:
+    image: mysql:8          # Docker Hub에서 MySQL 8 이미지 가져옴
+    env_file:
+      - .env # 루트의 .env 파일 설정
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}     # root 계정 비밀번호
+      MYSQL_DATABASE: cafe_study     # 자동으로 DB 생성
+      #MYSQL_USER: ${DB_USERNAME}     # .env에서 읽어옴
+      #MYSQL_PASSWORD: ${DB_PASSWORD} # .env에서 읽어옴
+    ports:
+      - "3306:3306"  # 호스트:컨테이너 포트 매핑
+      # 로컬에서 localhost:3306으로 접근 가능
+    volumes:
+      - mysql_data:/var/lib/mysql  # 컨테이너 재시작해도 데이터 유지
+      # mysql_data는 컨테이너가 관리하는 볼륨의 이름:데이터가 저장되는 경로
+    healthcheck: # MySQL 정상 실행 중인지 체크
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s  # 10초마다 체크
+      timeout: 5s    # 5초 안에 응답 없으면 실패
+      retries: 5     # 5번 실패하면 unhealthy
+
+  redis:
+    image: redis:7 # Docker Hub에서 Redis 7 이미지 가져옴
+    ports:
+      - "6379:6379"# 호스트:컨테이너 포트 매핑
+      # 로컬에서 localhost:6379으로 접근 가능
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis-data:/data
+    restart: always
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"# 호스트:컨테이너 포트 매핑
+      # 로컬에서 localhost:9090으로 접근 가능
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      # 로컬 파일을 컨테이너 안으로 마운트하는 설정
+      # 로컬: ./prometheus.yml
+      # 컨테이너: /etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana # Docker Hub에서 그라파나 이미지 가져옴
+    ports:
+      - "3001:3000"# 호스트:컨테이너 포트 매핑
+      # 로컬에서 localhost:3001으로 접근 가능
+      # 3000포트는 프론트가 쓰는 중임
+    depends_on:
+      - prometheus # Prometheus 먼저 실행 후 Grafana 실행
+
+
+volumes:
+  mysql_data:  # Docker가 mysql_data 볼륨 관리하겠다고 선언
+  redis-data:
+
+
