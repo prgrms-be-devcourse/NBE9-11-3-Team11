@@ -6,7 +6,8 @@ spring:
     import: optional:file:.env[.properties]
 
   datasource:
-    url: jdbc:mysql://localhost:3306/cafe_study?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    # 환경변수 SPRING_DATASOURCE_URL 있으면 그 값 사용(EC2 .env), 없으면 localhost 사용
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/cafe_study?serverTimezone=Asia/Seoul&characterEncoding=UTF-8}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -49,12 +50,17 @@ spring:
     job:
       enabled: false # 서버 시작시 자동실행
 
+
+  # 환경변수 REDIS_HOST가 있으면 그 값 사용(EC2 .env), 없으면 localhost 사용
+  # 로컬  → REDIS_HOST 환경변수 없음 → localhost 사용
+  # EC2   → REDIS_HOST=redis 주입됨  → redis 컨테이너명으로 접근
   data:
     redis:
-      host: localhost
-      port: 6379
-      password: ${REDIS_PASSWORD}
-
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      # 콜론 뒤 빈값 → 기본값이 빈 문자열
+      # CI에서 빈 값 주입 시 AUTH 명령어 안 보냄
 
 
 jwt:

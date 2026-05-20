@@ -363,7 +363,7 @@ spring:
     name: backend
 
   config:
-    import: optional:file:.env[.properties]
+    import: optional:file:..env[.properties]
 
   datasource:
     url: jdbc:mysql://localhost:3306/cafe_study?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
