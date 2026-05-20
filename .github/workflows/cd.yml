@@ -42,16 +42,18 @@ jobs:
         # NEXT_PUBLIC_ 변수는 빌드 타임에 번들에 포함되므로 --build-arg로 주입
         # Docker Hub에 푸시
 
-      - name: docker-compose.prod.yml, nginx.conf EC2 전송
+      - name: docker-compose.prod.yml EC2 전송
         uses: appleboy/scp-action@v1
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "docker-compose.prod.yml,nginx.conf"
+          source: "docker-compose.prod.yml"
           target: "/home/ubuntu/app"
           strip_components: 0
-          # 루트에 있는 파일 그대로 /home/ubuntu/app/ 으로 전송
+          # 루트에 있는 파일 그대로 /home/ubuntu/app/docker-compose.prod.yml로 전송
+          # nginx.conf 작성 완료 후 source에 추가 예정
+          # source: "docker-compose.prod.yml,nginx.conf"
 
       - name: EC2 배포
         uses: appleboy/ssh-action@v1
@@ -62,9 +64,9 @@ jobs:
           script: |
             cd /home/ubuntu/app
             docker-compose -f docker-compose.prod.yml pull
-          # Docker Hub에서 최신 이미지 받아옴
+            # Docker Hub에서 최신 이미지 받아옴
             docker-compose -f docker-compose.prod.yml up -d --force-recreate
-          # 새 이미지 기반으로 컨테이너 강제 교체 및 실행
-          # --force-recreate: 이미지 태그가 같아도 컨테이너 무조건 재생성
+            # 새 이미지 기반으로 컨테이너 강제 교체 및 실행
+            # --force-recreate: 이미지 태그가 같아도 컨테이너 무조건 재생성
             docker image prune -f
-          # 안 쓰는 옛날 이미지 삭제로 EC2 디스크 용량 관리
+            # 안 쓰는 옛날 이미지 삭제로 EC2 디스크 용량 관리
