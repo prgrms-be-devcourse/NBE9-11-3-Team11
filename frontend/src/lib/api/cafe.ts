@@ -21,6 +21,7 @@ export const fetchCafeList = async (params: {
     floorCounts?: string[];
     congestionLevels?: string[];
     franchises?: string[];
+    type?: string;
 }): Promise<CafeListResponse[]> => {
     const query = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
