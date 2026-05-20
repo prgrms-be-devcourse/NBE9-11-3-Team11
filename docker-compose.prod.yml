@@ -22,11 +22,13 @@ services:
       - .env
 
     environment:
+      # 운용환경 야물 파일 읽게 하기
+      SPRING_PROFILES_ACTIVE: prod
      # RDS 확정 후 수정 필요
       # MySQL 사용 시:
       # SPRING_DATASOURCE_URL: jdbc:mysql://${RDS_ENDPOINT}:3306/cafe_study?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
       # PostgreSQL 사용 시:
-      # SPRING_DATASOURCE_URL: jdbc:postgresql://${RDS_ENDPOINT}:5432/cafe_study
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${RDS_ENDPOINT}:5432/cafe_study
 
       #같은 네트워크 안에 있어서 컨테이너명(redis)으로 접근
       REDIS_HOST: redis
