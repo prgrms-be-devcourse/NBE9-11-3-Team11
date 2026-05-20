@@ -1,5 +1,3 @@
-import org.gradle.kotlin.dsl.implementation
-
 plugins {
     java
     // 이 프로젝트 코틀린으로 컴파일할게"라고 선언
@@ -103,6 +101,11 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-validation-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+
+    // Redis
+    implementation ("org.springframework.boot:spring-boot-starter-data-redis")
+
 }
 
 // kapt 상세 설정: 자바 어노테이션 프로세서와 충돌 방지
